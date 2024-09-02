@@ -1,0 +1,34 @@
+import axios from 'axios';
+
+const API_URL = 'http://127.0.0.1:8000/api/';
+
+export const login = async (user_id: string, password: string) => {
+  try {
+    const response = await axios.post(`${API_URL}login/`, { user_id, password });
+    if (response.status === 200) {
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('designation', response.data.designation)
+      return response.data.redirect;
+    } else {
+      throw new Error('Login failed');
+    }
+  } catch (error) {
+    console.error('Login error:', error);
+    throw error;
+  }
+};
+
+export const logout = async () => {
+  try {
+    const token = localStorage.getItem('token');
+    await axios.post(`${API_URL}logout/`, {}, {
+      headers: {
+        'Authorization': `Token ${token}`
+      }
+    });
+    localStorage.removeItem('token');
+    localStorage.removeItem('designation')
+  } catch (error) {
+    console.error('Logout error:', error);
+  }
+};

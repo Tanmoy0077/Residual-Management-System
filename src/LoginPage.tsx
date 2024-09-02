@@ -1,12 +1,13 @@
 // Login.tsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { login } from './AuthService';
 import "./css/Login.css";
 
 const LoginPage: React.FC = () => {
-  const [username, setUsername] = useState("");
+  const [user_id, setUserID] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState('');
 
   const navigate = useNavigate();
 
@@ -14,19 +15,10 @@ const LoginPage: React.FC = () => {
     event.preventDefault();
 
     try {
-      const response = await axios.post("http://127.0.0.1:8000/api/login", {
-        username,
-        password,
-      });
-
-      if (response.status === 200) {
-        navigate("/admin");
-      } else {
-        alert("Login failed. Please check your credentials.");
-      }
-    } catch (error) {
-      console.error("There was an error logging in:", error);
-      alert("Login failed. Please try again.");
+      const redirectPage = await login(user_id, password);
+      navigate(`/${redirectPage}`);
+    } catch (err) {
+      setError('Login failed. Please check your credentials.');
     }
   };
 
@@ -38,9 +30,9 @@ const LoginPage: React.FC = () => {
           <input
             type="text"
             placeholder="Enter username"
-            id="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            id="user_id"
+            value={user_id}
+            onChange={(e) => setUserID(e.target.value)}
             required
           />
           <span></span>
@@ -63,6 +55,7 @@ const LoginPage: React.FC = () => {
           <a href="/signup">Sign up</a>
         </p>
       </form>
+      {error && <div className="error">{error}</div>}
     </div>
   );
 };

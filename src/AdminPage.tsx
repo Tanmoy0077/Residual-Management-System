@@ -1,7 +1,11 @@
+import LogoutButton from "./components/LogoutButton";
 function AdminPage() {
   return (
-    <div>AdminPage</div>
-  )
+    <div>
+      AdminPage
+      <LogoutButton />
+    </div>
+  );
 }
 
-export default AdminPage
+export default AdminPage;
