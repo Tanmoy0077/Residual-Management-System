@@ -1,9 +1,9 @@
 import logo from "../assets/ISRO-Black.svg";
-import "../css/Hero.css"
-const Navbar = () => {
+import LogoutButton from "./LogoutButton";
 
+const Navbar = () => {
   return (
-    <nav className="navbar navbar-expand-lg navbar-light bg-light px-4 pattern">
+    <nav className="navbar navbar-expand-lg navbar-light bg-light px-4">
       <a className="navbar-brand" href="/">
         <img
           src={logo}
@@ -32,6 +32,7 @@ const Navbar = () => {
             </a>
           </li>
         </ul>
+          <LogoutButton/>
       </div>
     </nav>
   );

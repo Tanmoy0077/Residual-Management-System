@@ -15,7 +15,7 @@ const LogoutButton: React.FC = () => {
   };
 
   return (
-    <button onClick={handleLogout}>
+    <button className="btn btn-outline-danger my-2 my-sm-0 ms-auto" onClick={handleLogout}>
       Logout
     </button>
   );

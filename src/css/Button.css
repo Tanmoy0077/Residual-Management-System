@@ -1,0 +1,13 @@
+.edit-btn{
+    margin-left: 10px;
+    margin-right: 10px;
+    width: 100px;
+}
+.element-group{
+    margin: auto;
+    width: 133px;
+}
+
+.btn-green{
+    background-color: rgb(8, 156, 58);
+}
