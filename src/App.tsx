@@ -4,6 +4,11 @@ import LoginPage from "./LoginPage";
 import AdminPage from "./AdminPage";
 import ErrorPage from './ErrorPage';
 import ProtectedRoute from './ProtectedRoute';
+import SendingEngineer from './SendingEngineer';
+import SendingFacility from './SendingFacility';
+import ReceivingEngineer from './ReceivingEngineer';
+import ReceivingFacility from './ReceivingFacility';
+import DisposingFacility from './DisposingFacility';
 
 function App() {
   return (
@@ -19,22 +24,46 @@ function App() {
             </ProtectedRoute>
           }
         />
-        {/* <Route
-          path="/engineer"
+        <Route
+          path="/sending-engineer"
           element={
-            <ProtectedRoute requiredDesignation="Engineer">
-              <EngineerPage />
+            <ProtectedRoute requiredDesignation="sending engineer">
+              <SendingEngineer />
             </ProtectedRoute>
           }
         />
         <Route
-          path="/manager"
+          path="/sending-manager"
           element={
-            <ProtectedRoute requiredDesignation="Manager">
-              <ManagerPage />
+            <ProtectedRoute requiredDesignation="sending manager">
+              <SendingFacility />
             </ProtectedRoute>
           }
-        /> */}
+        />
+        <Route
+          path="/receiving-engineer"
+          element={
+            <ProtectedRoute requiredDesignation="receiving engineer">
+              <ReceivingEngineer />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/receiving-manager"
+          element={
+            <ProtectedRoute requiredDesignation="receiving manager">
+              <ReceivingFacility />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/disposing-manager"
+          element={
+            <ProtectedRoute requiredDesignation="disposing manager">
+              <DisposingFacility />
+            </ProtectedRoute>
+          }
+        />
         <Route path='*' element={<ErrorPage/>}/>
       </Routes>
     </Router>

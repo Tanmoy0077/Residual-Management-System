@@ -1,0 +1,33 @@
+/* TicketB.css */
+.ticket-container {
+    display: flex;
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    height: 100vh; /* Full height of the viewport */
+    background-color: #f0f0f0; /* Light grey background for the entire page */
+    margin: 0; /* Remove default margin */
+  }
+  
+  .ticket {
+    background-color: #ffcccb; /* Pink color for the ticket */
+    border-radius: 20px; /* Rounded corners for the ticket */
+    padding: 30px; /* Padding for internal spacing */
+    width: 650px; /* Adjust width of the ticket */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Shadow for 3D effect */
+    font-family: Arial, sans-serif; /* Font style */
+  }
+  
+  .ticket p {
+    margin: 12px 0; /* Margin for space between paragraphs */
+  }
+  
+  .ticket-details {
+    margin-top: 15px; /* Margin for spacing between sections */
+  }
+  
+  .ticket-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px; /* Margin at the top for space above footer */
+    padding: 0 70px; /* Padding to shift "Facility" and "Safety" */
+  }
