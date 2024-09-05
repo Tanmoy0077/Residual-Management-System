@@ -8,6 +8,7 @@ const AdminPage: React.FC = () => {
   const [users, setUsers] = useState<
     Array<{
       user_id: string;
+      name: string;
       last_login: string;
       designation: string;
       bldg_no: string;
@@ -16,6 +17,7 @@ const AdminPage: React.FC = () => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [selectedUser, setSelectedUser] = useState<{
     user_id: string;
+    name: string;
     designation: string;
     bldg_no: string;
     password?: string;
@@ -23,12 +25,14 @@ const AdminPage: React.FC = () => {
   } | null>(null);
   const [newUser, setNewUser] = useState<{
     user_id: string;
+    name:string;
     designation: string;
     bldg_no: string;
     password: string;
     confirmPassword: string;
   }>({
     user_id: "",
+    name: "",
     designation: "",
     bldg_no: "",
     password: "",
@@ -52,6 +56,7 @@ const AdminPage: React.FC = () => {
 
   const handleEdit = (user: {
     user_id: string;
+    name: string;
     designation: string;
     bldg_no: string;
   }) => {
@@ -73,6 +78,7 @@ const AdminPage: React.FC = () => {
       if (selectedUser) {
         // Edit user
         const updateData: any = {
+          name: selectedUser.name,
           designation: selectedUser.designation,
           bldg_no: selectedUser.bldg_no,
         };
@@ -95,6 +101,7 @@ const AdminPage: React.FC = () => {
         }
         await axios.post(`${API_URL}/users/`, {
           user_id: newUser.user_id,
+          name: newUser.name,
           designation: newUser.designation,
           bldg_no: newUser.bldg_no,
           password: newUser.password,
@@ -120,6 +127,7 @@ const AdminPage: React.FC = () => {
               setSelectedUser(null);
               setNewUser({
                 user_id: "",
+                name: "",
                 designation: "",
                 bldg_no: "",
                 password: "",
@@ -134,6 +142,7 @@ const AdminPage: React.FC = () => {
           <thead>
             <tr>
               <th>User ID</th>
+              <th>Name</th>
               <th>Designation</th>
               <th>Building No</th>
               <th>Edit</th>
@@ -144,6 +153,7 @@ const AdminPage: React.FC = () => {
             {users.map((user, i) => (
               <tr key={i}>
                 <td>{user.user_id}</td>
+                <td>{user.name}</td>
                 <td>{user.designation}</td>
                 <td>{user.bldg_no}</td>
 
@@ -192,6 +202,24 @@ const AdminPage: React.FC = () => {
                       );
                     } else {
                       setNewUser((prev) => ({ ...prev, user_id: value }));
+                    }
+                  }}
+                  required
+                />
+              </Form.Group>
+              <Form.Group controlId="formName">
+                <Form.Label>Name</Form.Label>
+                <Form.Control
+                  type="text"
+                  value={selectedUser ? selectedUser.name : newUser.name}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (selectedUser) {
+                      setSelectedUser((prev) =>
+                        prev ? { ...prev, name: value } : null
+                      );
+                    } else {
+                      setNewUser((prev) => ({ ...prev, name: value }));
                     }
                   }}
                   required

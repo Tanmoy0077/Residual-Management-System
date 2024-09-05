@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './css/ResidualPropellantForm.css'; // Import the CSS file for styling
+import '../css/ResidualPropellantForm.css'; // Import the CSS file for styling
 
 // Define an interface for a table row
 interface Row {

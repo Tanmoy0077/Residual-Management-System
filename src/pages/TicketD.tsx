@@ -1,6 +1,6 @@
 // TicketD.tsx
 import React from 'react';
-import './css/TicketD.css'; // Import the CSS file for styling
+import '../css/TicketD.css'; // Import the CSS file for styling
 
 const TicketD: React.FC = () => {
   return (

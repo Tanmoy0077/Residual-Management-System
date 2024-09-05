@@ -1,5 +1,5 @@
 import React from 'react';
-import './css/SendingEngineer.css'; // Import the CSS file for styling
+import '../css/SendingEngineer.css'; // Import the CSS file for styling
 
 // Define the type for a pending request
 interface PendingRequest {

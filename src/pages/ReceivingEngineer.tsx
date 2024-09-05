@@ -1,35 +1,35 @@
 import React from 'react';
-import './css/DisposingFacility.css'; // Import the CSS file for styling
+import '../css/ReceivingEngineer.css'; // Import the CSS file for styling
 
-// Define an interface for the request objects
+// Define an interface for request objects
 interface Request {
   bagId: string;
-  status: 'Verify' | 'Confirm'; // Status can be either 'Verify' or 'Confirm'
+  status: 'Validate' | 'Pending' | 'Make Changes';
 }
 
-const DisposingFacility: React.FC = () => {
+const ReceivingEngineer: React.FC = () => {
   const userName: string = "John Doe"; // Replace with dynamic user data as needed
 
   // Define the types of requests using the Request interface
-  const requestsToBeVerified: Request[] = [
-    { bagId: 'A001', status: 'Verify' },
-    { bagId: 'A002', status: 'Verify' },
+  const requestsToBeValidated: Request[] = [
+    { bagId: '1234', status: 'Validate' },
+    { bagId: '5678', status: 'Validate' },
   ];
 
-  const requestsToBeConfirmed: Request[] = [
-    { bagId: 'B001', status: 'Confirm' },
-    { bagId: 'B002', status: 'Confirm' },
+  const requestsToBeApproved: Request[] = [
+    { bagId: '9876', status: 'Pending' },
+    { bagId: '5432', status: 'Make Changes' },
   ];
 
   return (
-    <div className="disposing-facility">
+    <div className="receiving-engineer">
       <nav className="navbar">
         <div className="navbar-left">
           <h1>My Website</h1>
         </div>
         <div className="navbar-right">
-          <button className="nav-button">Verified Requests</button>
-          <button className="nav-button">Confirmed Requests</button>
+          <button className="nav-button">Validated Requests</button>
+          <button className="nav-button">Approved Requests</button>
           <button className="nav-button">Logout</button>
         </div>
       </nav>
@@ -43,7 +43,7 @@ const DisposingFacility: React.FC = () => {
             <table className="requests-table">
               <thead>
                 <tr>
-                  <th colSpan={2}>Requests to be Verified</th>
+                  <th colSpan={2}>Requests to be Validated</th>
                 </tr>
                 <tr>
                   <th>Bag Identification Number</th>
@@ -51,11 +51,11 @@ const DisposingFacility: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {requestsToBeVerified.map((request, index) => (
+                {requestsToBeValidated.map((request, index) => (
                   <tr key={index}>
                     <td>{request.bagId}</td>
                     <td>
-                      <button className="verify-button">{request.status}</button>
+                      <button className="validate-button">{request.status}</button>
                     </td>
                   </tr>
                 ))}
@@ -65,7 +65,7 @@ const DisposingFacility: React.FC = () => {
             <table className="requests-table">
               <thead>
                 <tr>
-                  <th colSpan={2}>Requests to be Confirmed</th>
+                  <th colSpan={2}>Requests to be Approved</th>
                 </tr>
                 <tr>
                   <th>Bag Identification Number</th>
@@ -73,11 +73,11 @@ const DisposingFacility: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {requestsToBeConfirmed.map((request, index) => (
+                {requestsToBeApproved.map((request, index) => (
                   <tr key={index}>
                     <td>{request.bagId}</td>
                     <td>
-                      <button className="confirm-button">{request.status}</button>
+                      <button className="status-button">{request.status}</button>
                     </td>
                   </tr>
                 ))}
@@ -90,4 +90,4 @@ const DisposingFacility: React.FC = () => {
   );
 };
 
-export default DisposingFacility;
+export default ReceivingEngineer;

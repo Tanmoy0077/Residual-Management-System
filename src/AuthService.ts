@@ -8,6 +8,7 @@ export const login = async (user_id: string, password: string) => {
     if (response.status === 200) {
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('designation', response.data.designation)
+      localStorage.setItem("name", response.data.name)
       return response.data.redirect;
     } else {
       throw new Error('Login failed');
@@ -28,6 +29,7 @@ export const logout = async () => {
     });
     localStorage.removeItem('token');
     localStorage.removeItem('designation')
+    localStorage.removeItem('name')
   } catch (error) {
     console.error('Logout error:', error);
   }

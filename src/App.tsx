@@ -4,11 +4,11 @@ import LoginPage from "./LoginPage";
 import AdminPage from "./AdminPage";
 import ErrorPage from './ErrorPage';
 import ProtectedRoute from './ProtectedRoute';
-import SendingEngineer from './SendingEngineer';
-import SendingFacility from './SendingFacility';
-import ReceivingEngineer from './ReceivingEngineer';
-import ReceivingFacility from './ReceivingFacility';
-import DisposingFacility from './DisposingFacility';
+import SendingEngineer from './pages/SendingEngineer';
+import SendingFacility from './pages/SendingFacility';
+import ReceivingEngineer from './pages/ReceivingEngineer';
+import ReceivingFacility from './pages/ReceivingFacility';
+import DisposingFacility from './pages/DisposingFacility';
 
 function App() {
   return (

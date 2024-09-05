@@ -1,13 +1,13 @@
-// TicketB.tsx
+// TicketE.tsx
 import React from 'react';
-import './css/TicketB.css'; // Import the CSS file for styling
+import '../css/TicketE.css'; // Import the CSS file for styling
 
-const TicketB: React.FC = () => {
+const TicketE: React.FC = () => {
   return (
     <div className="ticket-container">
       <div className="ticket">
         <p>
-          <strong><em>Category-B:</em></strong> SHROUD DUST / CONTAMINATED Al POWDER / UNCURED PROPELLANT
+          <strong><em>Category-E:</em></strong> POWDER CONTAMINATED WASTE (POLYTHENE/VELOSTAT/CLOTH/GLOVES)
         </p>
         
         <div className="ticket-details">
@@ -27,4 +27,4 @@ const TicketB: React.FC = () => {
   );
 }
 
-export default TicketB;
+export default TicketE;

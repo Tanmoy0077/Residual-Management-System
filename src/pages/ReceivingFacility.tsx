@@ -1,5 +1,5 @@
 import React from 'react';
-import './css/ReceivingFacility.css'; // Import the CSS file for styling
+import '../css/ReceivingFacility.css'; // Import the CSS file for styling
 
 // Define an interface for the request object
 interface Request {
