@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from "react-router-dom";
 import '../css/SendingEngineer.css'; // Import the CSS file for styling
 
 // Define the type for a pending request
@@ -16,12 +17,18 @@ const SendingEngineer: React.FC = () => {
     // Add more requests as needed
   ];
 
+  const navigate = useNavigate();
+
+  const createRequest = () => {
+    navigate(`/create-form`);
+  };
+
   return (
     <div className="sending-engineer">
       {/* Navigation bar */}
       <nav className="navbar">
         <div className="navbar-left">
-          <h1>My Website</h1>
+          <h1>Requesting Facility</h1>
         </div>
         <div className="navbar-right">
           <button className="nav-button">Approved Requests</button>
@@ -33,7 +40,7 @@ const SendingEngineer: React.FC = () => {
       <div className="main-content">
         <div className="header-section">
           <h2 className="welcome-message">Welcome Back, {userName}!</h2>
-          <button className="create-button">Create new request</button>
+          <button className="create-button" onClick={createRequest}>Create new request</button>
         </div>
 
         {/* Pending Requests table */}

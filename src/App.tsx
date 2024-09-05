@@ -9,12 +9,14 @@ import SendingFacility from './pages/SendingFacility';
 import ReceivingEngineer from './pages/ReceivingEngineer';
 import ReceivingFacility from './pages/ReceivingFacility';
 import DisposingFacility from './pages/DisposingFacility';
+import ResidualPropellantForm from './pages/ResidualPropellantForm';
 
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/create-form" element={<ResidualPropellantForm />} />
         <Route path="/login" element={<LoginPage/>} />
         <Route
           path="/admin"
@@ -71,3 +73,18 @@ function App() {
 }
 
 export default App;
+
+// import React from 'react';
+// import SendingEngineer from './pages/SendingEngineer'; // Import the DisposingEngineer component
+
+
+// const App: React.FC = () => {
+//   return (
+//     <div>
+//       {/* You can include a header or other components here if needed */}
+//       <SendingEngineer /> {/* Render the DisposingEngineer component */}
+//     </div>
+//   );
+// };
+
+// export default App;

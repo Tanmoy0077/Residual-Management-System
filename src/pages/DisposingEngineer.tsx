@@ -29,7 +29,7 @@ const DisposingEngineer: React.FC = () => {
       {/* Navigation Bar */}
       <nav className="navbar">
         <div className="navbar-left">
-          <h1>My Website</h1>
+          <h1>Disposing Facility</h1>
         </div>
         <div className="navbar-right">
           <button className="nav-button">Verified Requests</button>

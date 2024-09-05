@@ -20,7 +20,7 @@ const SendingFacility: React.FC = () => {
     <div className="sending-facility">
       <nav className="navbar">
         <div className="navbar-left">
-          <h1>My Website</h1>
+          <h1>Requesting Facility</h1>
         </div>
         <div className="navbar-right">
           <button className="nav-button">Authorized Requests</button>
