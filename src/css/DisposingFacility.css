@@ -1,111 +1,105 @@
-/* Reset margin, padding, and box-sizing for all elements */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-  
-  /* Ensure html and body occupy the full height */
-  html, body {
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    padding: 0;
-  }
-  
-  /* Ensure the root container takes up the full viewport */
-  #root {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-  }
-  
-  /* Main component container styling */
-  .disposing-facility {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh; /* Ensures the container fills the entire viewport height */
-    font-family: Arial, sans-serif;
-    width: 100%;
-  }
-  
-  /* Navbar styling */
-  .navbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: #333;
-    color: white;
-    padding: 10px 20px;
-    width: 100%;
-  }
-  
-  .navbar h1 {
-    margin: 0;
-  }
-  
-  .navbar-right {
-    display: flex;
-    gap: 10px;
-  }
-  
-  .nav-button {
-    background-color: #555;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    cursor: pointer;
-    font-size: 16px;
-  }
-  
-  .nav-button:hover {
-    background-color: #777;
-  }
-  
-  /* Main content styling */
-  .main-content {
-    flex-grow: 1;
-    padding: 20px;
-    width: 100%;
-  }
-  
-  .welcome-message {
-    font-weight: bold;
-    margin-bottom: 20px;
-  }
-  
-  .requests-section {
-    display: flex;
-    justify-content: space-between;
-  }
-  
-  .requests-table {
-    width: 48%;
-    border-collapse: collapse;
-  }
-  
-  .requests-table th,
-  .requests-table td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: center;
-  }
-  
-  .requests-table th[colspan="2"] {
-    background-color: #f2f2f2;
-  }
-  
-  .verify-button,
-  .confirm-button {
-    background-color: #5bc0de;
-    color: white;
-    padding: 5px 10px;
-    border: none;
-    cursor: pointer;
-  }
-  
-  .verify-button:hover,
-  .confirm-button:hover {
-    background-color: #31b0d5;
-  }
-  
+/* Make the entire container full screen */
+.full-screen-container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Styling for the navigation bar */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #007bff;
+  color: white;
+  padding: 10px;
+}
+
+.navbar-left h1 {
+  margin: 0;
+}
+
+.navbar-right .nav-button {
+  margin-left: 10px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+.navbar-right .nav-button:hover {
+  background-color: #218838;
+}
+
+/* Welcome message styling */
+.welcome-message {
+  padding: 20px;
+  font-size: 1.5em;
+  font-weight: bold;
+}
+
+/* Pending requests table */
+.pending-requests {
+  padding: 20px;
+}
+
+.requests-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.requests-table th,
+.requests-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.requests-table th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+}
+
+.view-button,
+.confirm-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.confirm-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.view-button:hover,
+.confirm-button:hover:enabled {
+  background-color: #0056b3;
+}
+
+/* Modal styling for bags table */
+.bags-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.bags-table th,
+.bags-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.bags-table th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+}
+
+.bags-table td input[type='checkbox'] {
+  width: 20px;
+  height: 20px;
+}
