@@ -25,7 +25,7 @@ const ReceivingEngineer: React.FC = () => {
     <div className="receiving-engineer">
       <nav className="navbar">
         <div className="navbar-left">
-          <h1>My Website</h1>
+          <h1>Storage Facility</h1>
         </div>
         <div className="navbar-right">
           <button className="nav-button">Validated Requests</button>
