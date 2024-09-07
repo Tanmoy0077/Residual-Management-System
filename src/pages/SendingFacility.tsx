@@ -1,20 +1,50 @@
-import React from 'react';
-import '../css/SendingFacility.css'; // Import the CSS file for styling
+import React, { useEffect, useState } from "react";
+import "../css/SendingFacility.css";
+import axios from "axios";
 
-// Define a type for a pending request
-interface PendingRequest {
-  bagId: string;
-  status: 'Authorize'; // Restrict status to the string 'Authorize'
+
+interface RequestStatus {
+  request_no: number;
+  no_of_items: number;
+  total_qty: string;
+  sending_engineer?: string;
+  sending_manager?: string;
+  receiving_engineer?: string;
+  receiving_manager?: string;
+  disposing_engineer?: string;
+  disposing_manager?: string;
+  sender_approval: "Yes" | "No";
+  make_changes: "Yes" | "No";
+  receiver_approval: "Yes" | "No";
+  disposal_confirmation: "Yes" | "No";
 }
 
 const SendingFacility: React.FC = () => {
-  const userName: string = "John Doe"; // Replace with dynamic user data as needed
-  
-  // Define the type of `pendingRequests` array using the `PendingRequest` interface
-  const pendingRequests: PendingRequest[] = [
-    { bagId: '1234', status: 'Authorize' },
-    { bagId: '5678', status: 'Authorize' },
-  ];
+  const userName: string = localStorage.getItem("userName") || "User";
+  const facility: string = localStorage.getItem("facility") || "Logged Out";
+  const [requestStatus, setRequestStatus] = useState<RequestStatus[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchRequestStatus = async () => {
+    try {
+      const response = await axios.get<RequestStatus[]>(
+        `http://localhost:8000/api/request_status/${facility}/`
+      );
+      setRequestStatus(response.data);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "An unknown error occurred"
+      );
+    }
+  };
+
+  useEffect(() => {
+    fetchRequestStatus();
+  }, []);
+
+  if (error) {
+    return <p>Error: {error}</p>;
+  }
 
   return (
     <div className="sending-facility">
@@ -36,19 +66,21 @@ const SendingFacility: React.FC = () => {
           <table>
             <thead>
               <tr>
-                <th>Bag Identification Number</th>
+                <th>Request Number</th>
                 <th>Status</th>
               </tr>
             </thead>
             <tbody>
-              {pendingRequests.map((request, index) => (
-                <tr key={index}>
-                  <td>{request.bagId}</td>
-                  <td>
-                    <button className="status-button">{request.status}</button>
-                  </td>
-                </tr>
-              ))}
+              {requestStatus
+                .filter((el) => el.make_changes === "No")
+                .map((request, index) => (
+                  <tr key={index}>
+                    <td>{request.request_no}</td>
+                    <td>
+                      <button className="status-button">Authorize</button>
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>

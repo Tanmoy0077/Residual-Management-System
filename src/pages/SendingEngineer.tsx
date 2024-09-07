@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "../css/SendingEngineer.css"; // Import the CSS file for styling
+import "../css/SendingEngineer.css";
 import axios from "axios";
 import AppNavbar from "../components/AppNavbar";
-
 
 interface RequestStatus {
   request_no: number;
@@ -18,14 +17,16 @@ interface RequestStatus {
   sender_approval: "Yes" | "No";
   make_changes: "Yes" | "No";
   receiver_approval: "Yes" | "No";
+  receiver_validated: "Yes" | "No";
   disposal_confirmation: "Yes" | "No";
 }
 
 const SendingEngineer: React.FC = () => {
   const userName: string = localStorage.getItem("userName") || "User";
-  const facility: string = localStorage.getItem('facility') || "Logged Out";
+  const facility: string = localStorage.getItem("facility") || "Logged Out";
   const [requestStatus, setRequestStatus] = useState<RequestStatus[]>([]);
   const [error, setError] = useState<string | null>(null);
+
   const fetchRequestStatus = async () => {
     try {
       const response = await axios.get<RequestStatus[]>(
@@ -38,7 +39,6 @@ const SendingEngineer: React.FC = () => {
       );
     }
   };
-
   useEffect(() => {
     fetchRequestStatus();
   }, []);

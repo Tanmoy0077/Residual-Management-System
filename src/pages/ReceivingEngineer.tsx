@@ -1,25 +1,50 @@
-import React from 'react';
-import '../css/ReceivingEngineer.css'; // Import the CSS file for styling
+import React, { useEffect, useState } from "react";
+import "../css/ReceivingEngineer.css"; // Import the CSS file for styling
+import axios from "axios";
 
-// Define an interface for request objects
-interface Request {
-  bagId: string;
-  status: 'Validate' | 'Pending' | 'Make Changes';
+
+interface RequestStatus {
+  request_no: number;
+  no_of_items: number;
+  total_qty: string;
+  sending_engineer?: string;
+  sending_manager?: string;
+  receiving_engineer?: string;
+  receiving_manager?: string;
+  disposing_engineer?: string;
+  disposing_manager?: string;
+  sender_approval: "Yes" | "No";
+  make_changes: "Yes" | "No";
+  receiver_approval: "Yes" | "No";
+  receiver_validated: "Yes" | "No";
+  disposal_confirmation: "Yes" | "No";
 }
 
 const ReceivingEngineer: React.FC = () => {
-  const userName: string = "John Doe"; // Replace with dynamic user data as needed
+  const userName: string = localStorage.getItem("userName") || "User";
+  const facility: string = localStorage.getItem("facility") || "Logged Out";
+  const [requestStatus, setRequestStatus] = useState<RequestStatus[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const fetchRequestStatus = async () => {
+    try {
+      const response = await axios.get<RequestStatus[]>(
+        `http://localhost:8000/api/request_status/${facility}/`
+      );
+      setRequestStatus(response.data);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "An unknown error occurred"
+      );
+    }
+  };
 
-  // Define the types of requests using the Request interface
-  const requestsToBeValidated: Request[] = [
-    { bagId: '1234', status: 'Validate' },
-    { bagId: '5678', status: 'Validate' },
-  ];
+  useEffect(() => {
+    fetchRequestStatus();
+  }, []);
 
-  const requestsToBeApproved: Request[] = [
-    { bagId: '9876', status: 'Pending' },
-    { bagId: '5432', status: 'Make Changes' },
-  ];
+  if (error) {
+    return <p>Error: {error}</p>;
+  }
 
   return (
     <div className="receiving-engineer">
@@ -51,14 +76,16 @@ const ReceivingEngineer: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {requestsToBeValidated.map((request, index) => (
-                  <tr key={index}>
-                    <td>{request.bagId}</td>
-                    <td>
-                      <button className="validate-button">{request.status}</button>
-                    </td>
-                  </tr>
-                ))}
+                {requestStatus
+                  .filter((element) => element.receiver_validated === "No")
+                  .map((request, index) => (
+                    <tr key={index}>
+                      <td>{request.request_no}</td>
+                      <td>
+                        <button className="validate-button">Validate</button>
+                      </td>
+                    </tr>
+                  ))}
               </tbody>
             </table>
 
@@ -73,14 +100,24 @@ const ReceivingEngineer: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {requestsToBeApproved.map((request, index) => (
-                  <tr key={index}>
-                    <td>{request.bagId}</td>
-                    <td>
-                      <button className="status-button">{request.status}</button>
-                    </td>
-                  </tr>
-                ))}
+                {requestStatus
+                  .filter((element) => element.receiver_approval === "No")
+                  .map((request, index) => (
+                    <tr key={index}>
+                      <td>{request.request_no}</td>
+                      <td>
+                        {request.make_changes === "No" ? (
+                          <button className="status-button pending-button">
+                            Pending
+                          </button>
+                        ) : (
+                          <button className="status-button changes-button">
+                            Make changes
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
               </tbody>
             </table>
           </div>
