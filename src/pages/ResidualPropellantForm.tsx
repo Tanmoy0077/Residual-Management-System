@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "../css/ResidualPropellantForm.css"; // Import the CSS file for styling
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 // Define an interface for a table row
 interface Row {
@@ -14,6 +15,7 @@ interface Row {
 
 interface RequestStatusData {
   request_no: number;
+  facility_name: string;
   no_of_items: number;
   total_qty: number;
   sending_engineer: string;
@@ -43,6 +45,7 @@ const ResidualPropellantForm: React.FC = () => {
   const [unit, setUnit] = useState<string>(""); // State for Unit
   const [dispatchDate, setDispatchDate] = useState<string>("");
   const [motorDetails, setMotorDetails] = useState<string>("");
+  const navigate = useNavigate();
 
   const [generatedNo] = useState<number>(Math.floor(Math.random() * 10000));
 
@@ -82,6 +85,7 @@ const ResidualPropellantForm: React.FC = () => {
   const makePostRequest = async () => {
     const requestData: RequestStatusData = {
       request_no: generatedNo,
+      facility_name: facility,
       no_of_items: rows.length,
       total_qty: calculateTotal(),
       sending_engineer: localStorage.getItem("name") || "User",
@@ -165,6 +169,7 @@ const ResidualPropellantForm: React.FC = () => {
     }
 
     alert("Form submitted successfully!");
+    navigate(`/sending-engineer`);
   };
 
   return (
