@@ -1,21 +1,47 @@
-import React from 'react';
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import '../css/SendingEngineer.css'; // Import the CSS file for styling
+import "../css/SendingEngineer.css"; // Import the CSS file for styling
+import axios from "axios";
+import AppNavbar from "../components/AppNavbar";
 
-// Define the type for a pending request
-interface PendingRequest {
-  bagId: string;
-  status: 'Pending' | 'Make changes'; // Restrict status to these two strings
+
+interface RequestStatus {
+  request_no: number;
+  no_of_items: number;
+  total_qty: string;
+  sending_engineer?: string;
+  sending_manager?: string;
+  receiving_engineer?: string;
+  receiving_manager?: string;
+  disposing_engineer?: string;
+  disposing_manager?: string;
+  sender_approval: "Yes" | "No";
+  make_changes: "Yes" | "No";
+  receiver_approval: "Yes" | "No";
+  disposal_confirmation: "Yes" | "No";
 }
 
 const SendingEngineer: React.FC = () => {
-  const userName: string = "John Doe"; // Replace this with dynamic user data
+  const userName: string = localStorage.getItem("userName") || "User";
+  const facility: string = localStorage.getItem('facility') || "Logged Out";
+  const [requestStatus, setRequestStatus] = useState<RequestStatus[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const fetchRequestStatus = async () => {
+    try {
+      const response = await axios.get<RequestStatus[]>(
+        `http://localhost:8000/api/request_status/${facility}/`
+      );
+      setRequestStatus(response.data);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "An unknown error occurred"
+      );
+    }
+  };
 
-  const pendingRequests: PendingRequest[] = [
-    { bagId: 'A001', status: 'Pending' },
-    { bagId: 'A002', status: 'Make changes' },
-    // Add more requests as needed
-  ];
+  useEffect(() => {
+    fetchRequestStatus();
+  }, []);
 
   const navigate = useNavigate();
 
@@ -23,45 +49,43 @@ const SendingEngineer: React.FC = () => {
     navigate(`/create-form`);
   };
 
+  if (error) {
+    return <p>Error: {error}</p>;
+  }
+
   return (
     <div className="sending-engineer">
-      {/* Navigation bar */}
-      <nav className="navbar">
-        <div className="navbar-left">
-          <h1>Requesting Facility</h1>
-        </div>
-        <div className="navbar-right">
-          <button className="nav-button">Approved Requests</button>
-          <button className="nav-button">Logout</button>
-        </div>
-      </nav>
-
-      {/* Welcome message and create new request button */}
+      <AppNavbar />
       <div className="main-content">
         <div className="header-section">
           <h2 className="welcome-message">Welcome Back, {userName}!</h2>
-          <button className="create-button" onClick={createRequest}>Create new request</button>
+          <button className="create-button" onClick={createRequest}>
+            Create new request
+          </button>
         </div>
 
-        {/* Pending Requests table */}
         <div className="pending-requests">
           <h3>Pending Requests</h3>
           <table className="requests-table">
             <thead>
               <tr>
-                <th>Bag Identification Number</th>
+                <th>Request Number</th>
                 <th>Status</th>
               </tr>
             </thead>
             <tbody>
-              {pendingRequests.map((request, index) => (
+              {requestStatus.map((request, index) => (
                 <tr key={index}>
-                  <td>{request.bagId}</td>
+                  <td>{request.request_no}</td>
                   <td>
-                    {request.status === 'Pending' ? (
-                      <button className="status-button pending-button">Pending</button>
+                    {request.make_changes === "No" ? (
+                      <button className="status-button pending-button">
+                        Pending
+                      </button>
                     ) : (
-                      <button className="status-button changes-button">Make changes</button>
+                      <button className="status-button changes-button">
+                        Make changes
+                      </button>
                     )}
                   </td>
                 </tr>
