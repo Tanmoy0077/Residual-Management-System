@@ -28,7 +28,7 @@ const SendingFacility: React.FC = () => {
   const fetchRequestStatus = async () => {
     try {
       const response = await axios.get<RequestStatus[]>(
-        `http://localhost:8000/api/request_status/${facility}/`
+        `http://localhost:8000/api/facility_status/${facility}/`
       );
       setRequestStatus(response.data);
     } catch (err) {
@@ -42,9 +42,7 @@ const SendingFacility: React.FC = () => {
     fetchRequestStatus();
   }, []);
 
-  if (error) {
-    return <p>Error: {error}</p>;
-  }
+  
 
   return (
     <div className="sending-facility">

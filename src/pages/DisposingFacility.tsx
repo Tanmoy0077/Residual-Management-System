@@ -14,6 +14,10 @@ interface Request {
 }
 
 const DisposingFacility: React.FC = () => {
+  const userName: string = localStorage.getItem("userName") || "User";
+  const facility: string = localStorage.getItem("facility") || "Logged Out";
+  //const [requestStatus, setRequestStatus] = useState<RequestStatus[]>([]);
+  //const [error, setError] = useState<string | null>(null);
   const [requests, setRequests] = useState<Request[]>([
     {
       requestNo: 'Request 1',
@@ -82,7 +86,7 @@ const DisposingFacility: React.FC = () => {
 
       {/* Welcome Message */}
       <div className="welcome-message">
-        <h2>Welcome Back, John Doe</h2>
+        <h2>Welcome Back, {userName}</h2>
       </div>
 
       {/* Pending Requests Table */}

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import '../css/DisposingEngineer.css'; // Import the CSS file for styling
+import React, { useState } from "react";
+import "../css/DisposingEngineer.css"; // Import the CSS file for styling
 
 // Interface for pending request row
 interface PendingRequest {
@@ -7,20 +7,26 @@ interface PendingRequest {
   status: string;
 }
 
+// const DisposingEngineer: React.FC = () => {
+//   const userName = 'John Doe'; // Replace with dynamic user name if needed
+
 const DisposingEngineer: React.FC = () => {
-  const userName = 'John Doe'; // Replace with dynamic user name if needed
+  const userName: string = localStorage.getItem("userName") || "User";
+  const facility: string = localStorage.getItem("facility") || "Logged Out";
+  //const [requestStatus, setRequestStatus] = useState<RequestStatus[]>([]);
+  //const [error, setError] = useState<string | null>(null);
 
   // Sample pending requests data
   const [pendingRequests, setPendingRequests] = useState<PendingRequest[]>([
-    { bagId: 'A001', status: 'Verify' },
-    { bagId: 'A002', status: 'Verify' },
-    { bagId: 'A003', status: 'Verify' },
+    { bagId: "A001", status: "Verify" },
+    { bagId: "A002", status: "Verify" },
+    { bagId: "A003", status: "Verify" },
   ]);
 
   // Handle the "Verify" button click for each row
   const handleVerify = (index: number) => {
     const newRequests = [...pendingRequests];
-    newRequests[index].status = 'Verified';
+    newRequests[index].status = "Verified";
     setPendingRequests(newRequests);
   };
 
@@ -49,7 +55,7 @@ const DisposingEngineer: React.FC = () => {
           <table className="requests-table">
             <thead>
               <tr>
-                <th>Bag Identification Number</th>
+                <th>Request Number</th>
                 <th>Status</th>
               </tr>
             </thead>
