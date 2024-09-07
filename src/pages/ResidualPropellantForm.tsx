@@ -12,6 +12,30 @@ interface Row {
   qty: number;
 }
 
+interface RequestStatusData {
+  request_no: number;
+  no_of_items: number;
+  total_qty: number;
+  sending_engineer: string;
+  sender_approval: string;
+  receiver_approval: string;
+  disposal_confirmation: string;
+}
+
+interface FormDetailsData {
+  request_no: number;
+  sl_no: string;
+  facility_name: string;
+  bldg_no: number;
+  unit: string;
+  segment_ref_no: string;
+  dispatch_date: string;
+  bag_id_no: string;
+  nature_material: string;
+  waste_type: string;
+  qty: number;
+}
+
 const ResidualPropellantForm: React.FC = () => {
   // State for form fields
   const [facility, setFacility] = useState<string>("");
@@ -19,18 +43,16 @@ const ResidualPropellantForm: React.FC = () => {
   const [unit, setUnit] = useState<string>(""); // State for Unit
   const [dispatchDate, setDispatchDate] = useState<string>("");
   const [motorDetails, setMotorDetails] = useState<string>("");
-  const [generatedNo, setGeneratedNo] = useState<number>(
-    Math.floor(Math.random() * 10000)
-  ); // Generates a random number for "No."
 
-  // State for rows in the table
+  const [generatedNo] = useState<number>(Math.floor(Math.random() * 10000));
+
   const [rows, setRows] = useState<Row[]>([
     { slNo: 1, bagId: "", material: "", category: "", buildingNo: 0, qty: 0 },
     { slNo: 2, bagId: "", material: "", category: "", buildingNo: 0, qty: 0 },
     { slNo: 3, bagId: "", material: "", category: "", buildingNo: 0, qty: 0 },
+    { slNo: 4, bagId: "", material: "", category: "", buildingNo: 0, qty: 0 },
   ]);
 
-  // Function to handle adding a new row to the table
   const addRow = () => {
     const newRow: Row = {
       slNo: rows.length + 1,
@@ -43,50 +65,81 @@ const ResidualPropellantForm: React.FC = () => {
     setRows([...rows, newRow]);
   };
 
-  // Function to handle input changes in the table rows
   const handleInputChange = (
     index: number,
     field: keyof Row,
     value: string | number
+
   ) => {
     const newRows = [...rows];
-    (newRows[index][field] as string | number) = value; // Use type assertion to allow assignment
+    (newRows[index][field] as string | number) = value;
     setRows(newRows);
   };
-
-  // Function to calculate the total quantity
   const calculateTotal = (): number => {
     return rows.reduce((total, row) => total + (row.qty || 0), 0);
   };
 
-  // Function to submit the form data via a POST request
-  const submitForm = async () => {
-    // Loop through each row and send individual requests
-    for (const row of rows) {
-      const formData = {
-        facility_name: facility, // Maps to facility_name in Django model
-        bldg_no: buildingNo, // Maps to bldg_no in Django model (ForeignKey)
-        unit: unit, // Maps to unit in Django model (choices)
-        segment_ref_no: motorDetails, // Maps to segment_ref_no in Django model
-        dispatch_date: dispatchDate, // Maps to dispatch_date in Django model
-        bag_id_no: row.bagId, // Maps to bag_id_no in Django model
-        nature_material: row.material, // Maps to nature_material in Django model
-        waste_type: row.category, // Maps to waste_type in Django model (choices)
-        qty: row.qty, // Maps to qty in Django model
-      };
+  const makePostRequest = async () => {
+    const requestData: RequestStatusData = {
+      request_no: generatedNo,
+      no_of_items: rows.length,
+      total_qty: calculateTotal(),
+      sending_engineer: localStorage.getItem("name") || "User",
+      sender_approval: "No",
+      receiver_approval: "No",
+      disposal_confirmation: "No"
+    };
+    console.log(requestData)
+    try {
+      const response = await axios.post("http://localhost:8000/api/request_status/", requestData);
 
+      if (response.status === 201) {
+        console.log("Post Request Success:", response.data);
+      } else {
+        console.error("Error:", response.statusText);
+      }
+    } catch (error: any) {
+      if (error.response) {
+        console.error("Server Error:", error.response.data);
+        alert(
+          `An error occurred: ${
+            error.response.data.message || "Please try again later."
+          }`
+        );
+      } else if (error.request) {
+        console.error("No response received:", error.request);
+        alert("No response received from the server. Please try again.");
+      } else {
+        console.error("Error setting up the request:", error.message);
+        alert(`Error: ${error.message}`);
+      }
+    }
+  };
+
+
+  const submitForm = async () => {
+    await makePostRequest();
+    const requestNo = generatedNo;
+    for (const row of rows) {
+      const slNo = `${requestNo}-${row.slNo}`;
+
+      const formData: FormDetailsData = {
+        request_no: requestNo,
+        sl_no: slNo,
+        facility_name: facility,
+        bldg_no: buildingNo || 0,
+        unit: unit,
+        segment_ref_no: motorDetails,
+        dispatch_date: dispatchDate,
+        bag_id_no: row.bagId,
+        nature_material: row.material,
+        waste_type: row.category,
+        qty: row.qty,
+      };
       console.log(formData);
 
       try {
-        const response = await axios.post(
-          "http://localhost:8000/api/form_details/",
-          formData,
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
+        const response = await axios.post(`http://localhost:8000/api/form_details/`, formData);
 
         if (response.status === 201) {
           console.log("Server Response:", response.data);
@@ -97,8 +150,7 @@ const ResidualPropellantForm: React.FC = () => {
         if (error.response) {
           console.error("Server Error:", error.response.data);
           alert(
-            `An error occurred: ${
-              error.response.data.message || "Please try again later."
+            `An error occurred: ${error.response.data.message || "Please try again later."
             }`
           );
         } else if (error.request) {
@@ -253,13 +305,20 @@ const ResidualPropellantForm: React.FC = () => {
                 </select>
               </td>
               <td>
-                <input
-                  type="text"
-                  value={row.buildingNo}
+                <select
+                  value={row.buildingNo || ""}
                   onChange={(e) =>
-                    handleInputChange(index, "buildingNo", e.target.value)
+                    handleInputChange(
+                      index,
+                      "buildingNo",
+                      e.target.value ? Number(e.target.value) : 0
+                    )
                   }
-                />
+                >
+                  <option value="">Select Building No.</option>
+                  <option value={101}>101</option>
+                  <option value={102}>102</option>
+                </select>
               </td>
               <td>
                 <input
@@ -300,7 +359,7 @@ const ResidualPropellantForm: React.FC = () => {
         <h3>Requesting Facility</h3>
         <div>
           <label className="mx-3 my-3">Engineer:</label>
-          <input className="mx-5 my-3"type="text" placeholder="Engineer Name and Date" />
+          <input className="mx-5 my-3" type="text" placeholder="Engineer Name and Date" />
           <label className="mx-3 my-3">Manager:</label>
           <input className="mx-5 my-3" type="text" placeholder="Manager Name and Date" />
         </div>
@@ -332,4 +391,3 @@ const ResidualPropellantForm: React.FC = () => {
 
 export default ResidualPropellantForm;
 
-//main-code please make the required changes
