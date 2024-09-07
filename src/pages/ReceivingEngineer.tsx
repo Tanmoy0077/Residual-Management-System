@@ -71,7 +71,7 @@ const ReceivingEngineer: React.FC = () => {
                   <th colSpan={2}>Requests to be Validated</th>
                 </tr>
                 <tr>
-                  <th>Bag Identification Number</th>
+                  <th>Request Number</th>
                   <th>Status</th>
                 </tr>
               </thead>
@@ -95,7 +95,7 @@ const ReceivingEngineer: React.FC = () => {
                   <th colSpan={2}>Requests to be Approved</th>
                 </tr>
                 <tr>
-                  <th>Bag Identification Number</th>
+                  <th>Request Number</th>
                   <th>Status</th>
                 </tr>
               </thead>

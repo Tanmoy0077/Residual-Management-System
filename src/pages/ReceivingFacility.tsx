@@ -1,20 +1,49 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import '../css/ReceivingFacility.css'; // Import the CSS file for styling
+import axios from 'axios';
 
-// Define an interface for the request object
-interface Request {
-  bagId: string;
-  status: 'Authorize';
+interface RequestStatus {
+  request_no: number;
+  no_of_items: number;
+  total_qty: string;
+  sending_engineer?: string;
+  sending_manager?: string;
+  receiving_engineer?: string;
+  receiving_manager?: string;
+  disposing_engineer?: string;
+  disposing_manager?: string;
+  sender_approval: "Yes" | "No";
+  make_changes: "Yes" | "No";
+  receiver_approval: "Yes" | "No";
+  receiver_validated: "Yes" | "No";
+  disposal_confirmation: "Yes" | "No";
 }
 
 const ReceivingFacility: React.FC = () => {
-  const userName: string = "John Doe"; // This is a placeholder; replace with dynamic data as needed
-  
-  // Define the type of pending requests using the Request interface
-  const pendingRequests: Request[] = [
-    { bagId: '1234', status: 'Authorize' },
-    { bagId: '5678', status: 'Authorize' },
-  ];
+  const userName: string = localStorage.getItem("userName") || "User";
+  const facility: string = localStorage.getItem("facility") || "Logged Out";
+  const [requestStatus, setRequestStatus] = useState<RequestStatus[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const fetchRequestStatus = async () => {
+    try {
+      const response = await axios.get<RequestStatus[]>(
+        `http://localhost:8000/api/request_status/${facility}/`
+      );
+      setRequestStatus(response.data);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "An unknown error occurred"
+      );
+    }
+  };
+
+  useEffect(() => {
+    fetchRequestStatus();
+  }, []);
+
+  if (error) {
+    return <p>Error: {error}</p>;
+  }
 
   return (
     <div className="receiving-facility">
@@ -36,16 +65,16 @@ const ReceivingFacility: React.FC = () => {
           <table>
             <thead>
               <tr>
-                <th>Bag Identification Number</th>
+                <th>Request Number</th>
                 <th>Status</th>
               </tr>
             </thead>
             <tbody>
-              {pendingRequests.map((request, index) => (
+              {requestStatus.filter((element) => element.receiver_approval === "No").map((request, index) => (
                 <tr key={index}>
-                  <td>{request.bagId}</td>
+                  <td>{request.request_no}</td>
                   <td>
-                    <button className="status-button">{request.status}</button>
+                    <button className="status-button">Authorize</button>
                   </td>
                 </tr>
               ))}
