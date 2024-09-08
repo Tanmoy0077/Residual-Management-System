@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import "../css/ResidualPropellantForm.css"; // Import the CSS file for styling
+import "../css/ResidualPropellantForm.css";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 // Define an interface for a table row
 interface Row {
@@ -45,6 +46,7 @@ const ResidualPropellantForm: React.FC = () => {
   const [motorDetails, setMotorDetails] = useState<string>("");
 
   const [generatedNo] = useState<number>(Math.floor(Math.random() * 10000));
+  const navigate = useNavigate();
 
   const [rows, setRows] = useState<Row[]>([
     { slNo: 1, bagId: "", material: "", category: "", buildingNo: 0, qty: 0 },
@@ -165,6 +167,7 @@ const ResidualPropellantForm: React.FC = () => {
     }
 
     alert("Form submitted successfully!");
+    navigate("/sending-engineer");
   };
 
   return (
