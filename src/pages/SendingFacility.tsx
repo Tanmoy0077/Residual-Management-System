@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "../css/SendingFacility.css";
 import axios from "axios";
-
+import { useNavigate } from "react-router-dom";
 
 interface RequestStatus {
   request_no: number;
@@ -20,10 +20,11 @@ interface RequestStatus {
 }
 
 const SendingFacility: React.FC = () => {
-  const userName: string = localStorage.getItem("userName") || "User";
+  const userName: string = localStorage.getItem("name") || "User";
   const facility: string = localStorage.getItem("facility") || "Logged Out";
   const [requestStatus, setRequestStatus] = useState<RequestStatus[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const fetchRequestStatus = async () => {
     try {
@@ -42,7 +43,13 @@ const SendingFacility: React.FC = () => {
     fetchRequestStatus();
   }, []);
 
-  
+  const authorizeManager = (request_no: number) => {
+    navigate(`/sm-form/${request_no}`);
+  };
+
+  if(error){
+    console.log(error)
+  }
 
   return (
     <div className="sending-facility">
@@ -70,12 +77,17 @@ const SendingFacility: React.FC = () => {
             </thead>
             <tbody>
               {requestStatus
-                .filter((el) => el.make_changes === "No")
+                .filter((el) => el.make_changes === "No" && el.sender_approval === 'No')
                 .map((request, index) => (
                   <tr key={index}>
                     <td>{request.request_no}</td>
                     <td>
-                      <button className="status-button">Authorize</button>
+                      <button
+                        className="status-button"
+                        onClick={() => authorizeManager(request.request_no)}
+                      >
+                        Authorize
+                      </button>
                     </td>
                   </tr>
                 ))}

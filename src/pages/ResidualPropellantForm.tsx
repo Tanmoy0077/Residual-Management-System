@@ -15,6 +15,7 @@ interface Row {
 
 interface RequestStatusData {
   request_no: number;
+  facility_name: string;
   no_of_items: number;
   total_qty: number;
   sending_engineer: string;
@@ -44,6 +45,7 @@ const ResidualPropellantForm: React.FC = () => {
   const [unit, setUnit] = useState<string>(""); // State for Unit
   const [dispatchDate, setDispatchDate] = useState<string>("");
   const [motorDetails, setMotorDetails] = useState<string>("");
+  const navigate = useNavigate();
 
   const [generatedNo] = useState<number>(Math.floor(Math.random() * 10000));
   const navigate = useNavigate();
@@ -84,6 +86,7 @@ const ResidualPropellantForm: React.FC = () => {
   const makePostRequest = async () => {
     const requestData: RequestStatusData = {
       request_no: generatedNo,
+      facility_name: facility,
       no_of_items: rows.length,
       total_qty: calculateTotal(),
       sending_engineer: localStorage.getItem("name") || "User",
@@ -138,7 +141,6 @@ const ResidualPropellantForm: React.FC = () => {
         waste_type: row.category,
         qty: row.qty,
       };
-      console.log(formData);
 
       try {
         const response = await axios.post(`http://localhost:8000/api/form_details/`, formData);
@@ -167,7 +169,7 @@ const ResidualPropellantForm: React.FC = () => {
     }
 
     alert("Form submitted successfully!");
-    navigate("/sending-engineer");
+    navigate(`/sending-engineer`);
   };
 
   return (

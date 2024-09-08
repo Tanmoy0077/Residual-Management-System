@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Modal, Button, Form } from "react-bootstrap";
-import "./css/SmForm.css"; // Import the CSS file for styling
+import { useParams, useNavigate } from "react-router-dom";
+import "../css/SmForm.css";
 
-// Define an interface for a table row
 interface Row {
   slNo: number;
   bagId: string;
@@ -13,45 +13,82 @@ interface Row {
   qty: number;
 }
 
+interface FormDetailsData {
+  sl_no: string;
+  facility_name: string;
+  bldg_no: number;
+  unit: string;
+  segment_ref_no: string;
+  dispatch_date: string;
+  bag_id_no: string;
+  nature_material: string;
+  waste_type: string;
+  qty: number;
+}
+
+interface RequestStatusData {
+  facility_name: string;
+  no_of_items: number;
+  total_qty: number;
+  sending_engineer: string;
+  sender_approval: string;
+  receiver_approval: string;
+  disposal_confirmation: string;
+}
+
 const SmForm: React.FC = () => {
-  // State for form fields
+  const { request_no } = useParams<{ request_no: string }>();
   const [facility, setFacility] = useState<string>("");
   const [buildingNo, setBuildingNo] = useState<number>();
   const [unit, setUnit] = useState<string>("");
   const [dispatchDate, setDispatchDate] = useState<string>("");
   const [motorDetails, setMotorDetails] = useState<string>("");
-  const [generatedNo, setGeneratedNo] = useState<number>(Math.floor(Math.random() * 10000));
-
-  // State for rows in the table
   const [rows, setRows] = useState<Row[]>([]);
   const [editable, setEditable] = useState<boolean>(false);
   const [showRemarksModal, setShowRemarksModal] = useState<boolean>(false);
   const [remarks, setRemarks] = useState<string>("");
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Fetch data from the server when the component mounts
+    if (!request_no) return;
+
     const fetchData = async () => {
       try {
-        const response = await axios.get("http://localhost:8000/api/form_details/1/");
+        const response = await axios.get(
+          `http://localhost:8000/api/request-details/${request_no}/`
+        );
         const data = response.data;
 
-        // Initialize form data
-        setFacility(data.facility_name);
-        setBuildingNo(data.bldg_no);
-        setUnit(data.unit);
-        setDispatchDate(data.dispatch_date);
-        setMotorDetails(data.segment_ref_no);
-        setGeneratedNo(data.generated_no);
-        setRows(data.rows);
+        if (Array.isArray(data)) {
+          setFacility(data[0].facility_name || "");
+          setBuildingNo(data[0].bldg_no || 0);
+          setUnit(data[0].unit || "");
+          setDispatchDate(data[0].dispatch_date || "");
+          setMotorDetails(data[0].segment_ref_no || "");
+
+          const formattedRows = data.map((item: any) => ({
+            slNo: item.sl_no.split("-")[1],
+            bagId: item.bag_id_no,
+            material: item.nature_material,
+            category: item.waste_type,
+            buildingNo: item.bldg_no,
+            qty: Number.parseFloat(item.qty),
+          }));
+          setRows(formattedRows);
+        }
       } catch (error) {
         console.error("Error fetching data:", error);
       }
     };
 
     fetchData();
-  }, []);
+  }, [request_no]);
 
-  const handleInputChange = (index: number, field: keyof Row, value: string | number) => {
+  const handleInputChange = (
+    index: number,
+    field: keyof Row,
+    value: string | number
+  ) => {
     if (editable) {
       const newRows = [...rows];
       (newRows[index][field] as string | number) = value;
@@ -77,13 +114,118 @@ const SmForm: React.FC = () => {
 
   const submitRemarks = async () => {
     try {
-      await axios.post("http://localhost:8000/api/submit_remarks/", { remarks });
+      await axios.post("http://localhost:8000/api/remarks/", {
+        request_no,
+        remarks,
+      });
+      console.log("Remarks sent");
+      const make_changes: string = "Yes";
+      await axios.put(
+        `http://localhost:8000/api/request_status/${request_no}/`,
+        { make_changes }
+      );
+      console.log("Status sent");
       alert("Remarks submitted successfully!");
+      navigate("/sending-manager");
     } catch (error) {
       console.error("Error submitting remarks:", error);
     } finally {
       setShowRemarksModal(false);
     }
+  };
+
+  const makePostRequest = async () => {
+    const requestData: RequestStatusData = {
+      facility_name: facility,
+      no_of_items: rows.length,
+      total_qty: calculateTotal(),
+      sending_engineer: localStorage.getItem("name") || "User",
+      sender_approval: "No",
+      receiver_approval: "No",
+      disposal_confirmation: "No",
+    };
+    console.log(requestData);
+    try {
+      const response = await axios.put(
+        `http://localhost:8000/api/request_status/${request_no}/`,
+        requestData
+      );
+
+      if (response.status === 200) {
+        console.log("Post Request Success:", response.data);
+      } else {
+        console.error("Error:", response.statusText);
+      }
+    } catch (error: any) {
+      if (error.response) {
+        console.error("Server Error:", error.response.data);
+        alert(
+          `An error occurred: ${
+            error.response.data.message || "Please try again later."
+          }`
+        );
+      } else if (error.request) {
+        console.error("No response received:", error.request);
+        alert("No response received from the server. Please try again.");
+      } else {
+        console.error("Error setting up the request:", error.message);
+        alert(`Error: ${error.message}`);
+      }
+    }
+  };
+
+  const handleSave = async () => {
+    await makePostRequest();
+    console.log("Updated status");
+    const requestNo = request_no;
+    for (const row of rows) {
+      const slNo = `${requestNo}-${row.slNo}`;
+
+      const formData: FormDetailsData = {
+        sl_no: slNo,
+        facility_name: facility,
+        bldg_no: buildingNo || 0,
+        unit: unit,
+        segment_ref_no: motorDetails,
+        dispatch_date: dispatchDate,
+        bag_id_no: row.bagId,
+        nature_material: row.material,
+        waste_type: row.category,
+        qty: row.qty,
+      };
+      console.log(formData);
+
+      try {
+        const response = await axios.put(
+          `http://localhost:8000/api/form_details/${slNo}/`,
+          formData
+        );
+
+        if (response.status === 200) {
+          console.log("Server Response:", response.data);
+        } else {
+          console.error("Error:", response.statusText);
+        }
+      } catch (error: any) {
+        if (error.response) {
+          console.error("Server Error:", error.response.data);
+          alert(
+            `An error occurred: ${
+              error.response.data.message || "Please try again later."
+            }`
+          );
+        } else if (error.request) {
+          console.error("No response received:", error.request);
+          alert("No response received from the server. Please try again.");
+        } else {
+          console.error("Error setting up the request:", error.message);
+          alert(`Error: ${error.message}`);
+        }
+        return;
+      }
+    }
+    alert("Form updated successfully!");
+    navigate("/sending-manager");
   };
 
   const handleEdit = () => {
@@ -96,8 +238,13 @@ const SmForm: React.FC = () => {
 
   const handleAuthorize = async () => {
     try {
-      await axios.post("http://localhost:8000/api/authorize_form/");
+      const sender_approval: string = "Yes";
+      await axios.put(
+        `http://localhost:8000/api/request_status/${request_no}/`,
+        { sender_approval }
+      );
       alert("Form authorized successfully!");
+      navigate("/sending-manager");
     } catch (error) {
       console.error("Error authorizing form:", error);
     }
@@ -122,7 +269,7 @@ const SmForm: React.FC = () => {
         </p>
         <div className="w-1">
           <label>No.:</label>
-          <input type="text" value={generatedNo} disabled />
+          <input type="text" value={request_no} disabled />
         </div>
       </div>
       <div className="d-flex justify-content-between align-items-center">
@@ -145,14 +292,21 @@ const SmForm: React.FC = () => {
           <div className="form-entry">
             <label>Building No.:</label>
             <select
-              value={buildingNo || ""}
-              onChange={(e) => editable && setBuildingNo(e.target.value ? Number(e.target.value) : 0)}
+              value={buildingNo ?? ""}
+              onChange={(e) =>
+                editable &&
+                setBuildingNo(
+                  e.target.value ? Number(e.target.value) : undefined
+                )
+              }
               className="half-width-input"
               disabled={!editable}
             >
               <option value="">Select Building No.</option>
+              {/* Optionally populate these options dynamically if needed */}
               <option value={101}>101</option>
               <option value={102}>102</option>
+              {/* Add more options if needed */}
             </select>
           </div>
 
@@ -213,7 +367,9 @@ const SmForm: React.FC = () => {
                 <input
                   type="text"
                   value={row.bagId}
-                  onChange={(e) => handleInputChange(index, "bagId", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange(index, "bagId", e.target.value)
+                  }
                   disabled={!editable}
                 />
               </td>
@@ -221,14 +377,18 @@ const SmForm: React.FC = () => {
                 <input
                   type="text"
                   value={row.material}
-                  onChange={(e) => handleInputChange(index, "material", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange(index, "material", e.target.value)
+                  }
                   disabled={!editable}
                 />
               </td>
               <td>
                 <select
                   value={row.category}
-                  onChange={(e) => handleInputChange(index, "category", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange(index, "category", e.target.value)
+                  }
                   disabled={!editable}
                 >
                   <option value="">Select Category</option>
@@ -243,7 +403,9 @@ const SmForm: React.FC = () => {
                 <input
                   type="text"
                   value={row.buildingNo}
-                  onChange={(e) => handleInputChange(index, "buildingNo", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange(index, "buildingNo", e.target.value)
+                  }
                   disabled={!editable}
                 />
               </td>
@@ -251,7 +413,9 @@ const SmForm: React.FC = () => {
                 <input
                   type="number"
                   value={row.qty}
-                  onChange={(e) => handleInputChange(index, "qty", parseFloat(e.target.value))}
+                  onChange={(e) =>
+                    handleInputChange(index, "qty", parseFloat(e.target.value))
+                  }
                   disabled={!editable}
                 />
               </td>
@@ -265,7 +429,11 @@ const SmForm: React.FC = () => {
           </tr>
         </tbody>
       </table>
-      <button className="btn btn-success add-btn" onClick={addRow} disabled={!editable}>
+      <button
+        className="btn btn-success add-btn"
+        onClick={addRow}
+        disabled={!editable}
+      >
         +
       </button>
 
@@ -279,10 +447,54 @@ const SmForm: React.FC = () => {
         </ul>
       </div>
 
-      <div className="d-flex flex-column justify-content-center align-items-center my-4">
-        <Button variant="primary" onClick={handleEdit} className="mx-2">Edit</Button>
-        <Button variant="warning" onClick={handleSendBack} className="mx-2">Send Back</Button>
-        <Button variant="success" onClick={handleAuthorize} className="mx-2">Authorize</Button>
+      <div className="d-flex flex-row justify-content-center align-items-center my-4">
+        {editable ? (
+          <>
+            <Button
+              variant="primary"
+              onClick={handleSave}
+              className="mx-2"
+              style={{ width: "120px" }}
+            >
+              Save
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={() => setEditable(false)}
+              className="mx-2"
+              style={{ width: "120px" }}
+            >
+              Cancel
+            </Button>
+          </>
+        ) : (
+          <>
+            <Button
+              variant="primary"
+              onClick={handleEdit}
+              className="mx-2"
+              style={{ width: "120px" }}
+            >
+              Edit
+            </Button>
+            <Button
+              variant="warning"
+              onClick={handleSendBack}
+              className="mx-2"
+              style={{ width: "120px" }}
+            >
+              Send Back
+            </Button>
+            <Button
+              variant="success"
+              onClick={handleAuthorize}
+              className="mx-2"
+              style={{ width: "120px" }}
+            >
+              Authorize
+            </Button>
+          </>
+        )}
       </div>
 
       <Modal show={showRemarksModal} onHide={() => setShowRemarksModal(false)}>
@@ -301,7 +513,10 @@ const SmForm: React.FC = () => {
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowRemarksModal(false)}>
+          <Button
+            variant="secondary"
+            onClick={() => setShowRemarksModal(false)}
+          >
             Close
           </Button>
           <Button variant="primary" onClick={submitRemarks}>

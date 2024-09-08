@@ -10,6 +10,7 @@ import ReceivingEngineer from './pages/ReceivingEngineer';
 import ReceivingFacility from './pages/ReceivingFacility';
 import DisposingFacility from './pages/DisposingFacility';
 import ResidualPropellantForm from './pages/ResidualPropellantForm';
+import SmForm from './pages/SmForm';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/create-form" element={<ResidualPropellantForm />} />
+        <Route path="/sm-form/:request_no" element={<SmForm />} />
         <Route path="/login" element={<LoginPage/>} />
         <Route
           path="/admin"
