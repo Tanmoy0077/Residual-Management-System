@@ -12,6 +12,11 @@ import DisposingFacility from './pages/DisposingFacility';
 import ResidualPropellantForm from './pages/ResidualPropellantForm';
 import SmForm from './pages/SmForm';
 import ReForm from './pages/ReForm';
+import RmForm from './pages/RmForm';
+import DisposingEngineer from './pages/DisposingEngineer';
+import DeForm from './pages/DeForm';
+// import DeForm from './pages/DeForm';
+// import DmForm from './pages/DmForm';
 
 function App() {
   return (
@@ -21,6 +26,9 @@ function App() {
         <Route path="/create-form" element={<ResidualPropellantForm />} />
         <Route path="/sm-form/:request_no" element={<SmForm />} />
         <Route path="/re-form/:request_no" element={<ReForm />} />
+        <Route path="/rm-form/:request_no" element={<RmForm />} />
+        <Route path="/de-form/:request_no" element={<DeForm />} />
+        {/* <Route path="/dm-form/:request_no" element={<DmForm />} /> */}
         <Route path="/login" element={<LoginPage/>} />
         <Route
           path="/admin"
@@ -59,6 +67,14 @@ function App() {
           element={
             <ProtectedRoute requiredDesignation="receiving manager">
               <ReceivingFacility />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/disposing-engineer"
+          element={
+            <ProtectedRoute requiredDesignation="disposing engineer">
+              <DisposingEngineer />
             </ProtectedRoute>
           }
         />

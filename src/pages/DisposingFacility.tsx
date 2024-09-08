@@ -1,79 +1,119 @@
-import React, { useState } from 'react';
-import { Modal, Button } from 'react-bootstrap';
-import '../css/DisposingFacility.css';
+import React, { useState, useEffect } from "react";
+import { Modal, Button } from "react-bootstrap";
+import axios from "axios";
+import "../css/DisposingFacility.css";
 
 interface Bag {
-  bagNo: string;
+  sl_no: string;
+  facility_name: string;
+  bldg_no: number;
+  unit: string;
+  segment_ref_no: string;
+  dispatch_date: string;
+  bag_id_no: string;
+  nature_material: string;
+  waste_type: string;
+  qty: number;
   disposed: boolean;
 }
 
-interface Request {
-  requestNo: string;
-  disposedQty: string;  // Format: 'X/Y' (e.g., '7/10')
-  bags: Bag[];
+interface RequestStatus {
+  request_no: number;
+  no_of_items: number;
+  total_qty: string;
+  sending_engineer?: string;
+  sending_manager?: string;
+  receiving_engineer?: string;
+  receiving_manager?: string;
+  disposing_engineer?: string;
+  disposing_manager?: string;
+  sender_approval: "Yes" | "No";
+  make_changes: "Yes" | "No";
+  receiver_approval: "Yes" | "No";
+  receiver_validated: "Yes" | "No";
+  disposal_validated: "Yes" | "No";
+  disposal_confirmation: "Yes" | "No";
 }
 
 const DisposingFacility: React.FC = () => {
-  const userName: string = localStorage.getItem("userName") || "User";
+  const userName: string = localStorage.getItem("name") || "User";
   const facility: string = localStorage.getItem("facility") || "Logged Out";
-  //const [requestStatus, setRequestStatus] = useState<RequestStatus[]>([]);
-  //const [error, setError] = useState<string | null>(null);
-  const [requests, setRequests] = useState<Request[]>([
-    {
-      requestNo: 'Request 1',
-      disposedQty: '7/10',
-      bags: [
-        { bagNo: 'Bag 1', disposed: true },
-        { bagNo: 'Bag 2', disposed: true },
-        { bagNo: 'Bag 3', disposed: false },
-        { bagNo: 'Bag 4', disposed: false },
-        { bagNo: 'Bag 5', disposed: true },
-        { bagNo: 'Bag 6', disposed: true },
-        { bagNo: 'Bag 7', disposed: false },
-        { bagNo: 'Bag 8', disposed: false },
-        { bagNo: 'Bag 9', disposed: false },
-        { bagNo: 'Bag 10', disposed: false },
-      ],
-    },
-    {
-      requestNo: 'Request 2',
-      disposedQty: '4/8',
-      bags: [
-        { bagNo: 'Bag 1', disposed: true },
-        { bagNo: 'Bag 2', disposed: false },
-        { bagNo: 'Bag 3', disposed: true },
-        { bagNo: 'Bag 4', disposed: false },
-        { bagNo: 'Bag 5', disposed: false },
-        { bagNo: 'Bag 6', disposed: false },
-        { bagNo: 'Bag 7', disposed: false },
-        { bagNo: 'Bag 8', disposed: false },
-      ],
-    },
-  ]);
 
-  const [showModal, setShowModal] = useState(false);
-  const [selectedRequest, setSelectedRequest] = useState<Request | null>(null);
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [selectedRequest, setSelectedRequest] = useState<RequestStatus | null>(null);
+  const [requestDetails, setRequestDetails] = useState<Bag[]>([]);
+  const [requestStatus, setRequestStatus] = useState<RequestStatus[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleViewClick = (request: Request) => {
-    setSelectedRequest(request);
-    setShowModal(true);
+  const fetchRequestStatus = async () => {
+    try {
+      const response = await axios.get<RequestStatus[]>(
+        `http://localhost:8000/api/facility_status/${facility}/`
+      );
+      setRequestStatus(response.data);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "An unknown error occurred"
+      );
+    }
   };
 
-  const toggleDisposed = (requestIndex: number, bagIndex: number) => {
-    const updatedRequests = [...requests];
-    updatedRequests[requestIndex].bags[bagIndex].disposed = !updatedRequests[requestIndex].bags[bagIndex].disposed;
+  useEffect(() => {
+    fetchRequestStatus();
+  }, []);
 
-    // Update the disposed quantity (X/Y) for the request
-    const totalBags = updatedRequests[requestIndex].bags.length;
-    const disposedBags = updatedRequests[requestIndex].bags.filter(bag => bag.disposed).length;
-    updatedRequests[requestIndex].disposedQty = `${disposedBags}/${totalBags}`;
+  if (error) {
+    return <p>Error: {error}</p>;
+  }
 
-    setRequests(updatedRequests);
+  const handleViewClick = (request: RequestStatus) => {
+    setSelectedRequest(request);
+    setShowModal(true);
+
+    axios
+      .get<Bag[]>(`http://localhost:8000/api/request-details/${request.request_no}/`)
+      .then((response) => {
+        setRequestDetails(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching request details:", error);
+      });
+  };
+
+  const toggleDisposed = (bagIndex: number) => {
+    const updatedDetails = [...requestDetails];
+    updatedDetails[bagIndex].disposed = !updatedDetails[bagIndex].disposed;
+
+    const totalBags = updatedDetails.length;
+    const disposedBags = updatedDetails.filter((bag) => bag.disposed).length;
+    const updatedRequest = selectedRequest
+      ? { ...selectedRequest, disposedQty: `${disposedBags}/${totalBags}` }
+      : null;
+
+    setRequestDetails(updatedDetails);
+    setSelectedRequest(updatedRequest);
+  };
+
+  const handleSaveChanges = () => {
+    if (selectedRequest) {
+      const updatePromises = requestDetails.map((bag) =>
+        axios.put(`http://localhost:8000/api/form_details/${bag.sl_no}/`, {
+          disposed: bag.disposed,
+        })
+      );
+
+      Promise.all(updatePromises)
+        .then(() => {
+          setShowModal(false);
+        })
+        .catch((error) => {
+          console.error("Error saving changes:", error);
+        });
+    }
   };
 
   return (
     <div className="full-screen-container">
-      {/* Navigation */}
       <nav className="navbar">
         <div className="navbar-left">
           <h1>Disposing Facility</h1>
@@ -84,51 +124,67 @@ const DisposingFacility: React.FC = () => {
         </div>
       </nav>
 
-      {/* Welcome Message */}
       <div className="welcome-message">
         <h2>Welcome Back, {userName}</h2>
       </div>
 
-      {/* Pending Requests Table */}
       <div className="pending-requests">
         <h3>Pending Requests</h3>
         <table className="requests-table">
           <thead>
             <tr>
               <th>Request Number</th>
-              <th>Disposed Qty (kg)</th>
+              <th>Disposed Qty</th>
               <th>Stocks</th>
               <th>Status</th>
             </tr>
           </thead>
           <tbody>
-            {requests.map((request, requestIndex) => (
-              <tr key={requestIndex}>
-                <td>{request.requestNo}</td>
-                <td>{request.disposedQty}</td>
-                <td>
-                  <button className="view-button" onClick={() => handleViewClick(request)}>
-                    View
-                  </button>
-                </td>
-                <td>
-                  <button
-                    className="confirm-button"
-                    disabled={request.disposedQty !== `${request.bags.length}/${request.bags.length}`}
-                  >
-                    Confirm
-                  </button>
-                </td>
-              </tr>
-            ))}
+            {requestStatus
+              .filter(
+                (element) =>
+                  element.disposal_validated === "Yes" &&
+                  element.disposal_confirmation === "No"
+              )
+              .map((request, requestIndex) => {
+               
+                const totalBags = requestDetails.length;
+                const disposedBags = requestDetails.filter((bag) => bag.disposed).length;
+                const disposedQty = `${disposedBags}/${totalBags}`;
+                const allBagsChecked = disposedBags === totalBags;
+
+                return (
+                  <tr key={requestIndex}>
+                    <td>{request.request_no}</td>
+                    <td>{disposedQty}</td>
+                    <td>
+                      <button
+                        className="view-button"
+                        onClick={() => handleViewClick(request)}
+                      >
+                        View
+                      </button>
+                    </td>
+                    <td>
+                      <button
+                        className="confirm-button"
+                        disabled={!allBagsChecked}
+                      >
+                        Confirm
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
           </tbody>
         </table>
       </div>
 
-      {/* Modal for Bag Details */}
       <Modal show={showModal} onHide={() => setShowModal(false)} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Bag Details for {selectedRequest?.requestNo}</Modal.Title>
+          <Modal.Title>
+            Bag Details for {selectedRequest?.request_no}
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <table className="bags-table">
@@ -139,19 +195,14 @@ const DisposingFacility: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {selectedRequest?.bags.map((bag, bagIndex) => (
-                <tr key={bagIndex}>
-                  <td>{bag.bagNo}</td>
+              {requestDetails.map((bag, bagIndex) => (
+                <tr key={bag.sl_no}>
+                  <td>{bag.bag_id_no}</td>
                   <td>
                     <input
                       type="checkbox"
                       checked={bag.disposed}
-                      onChange={() =>
-                        toggleDisposed(
-                          requests.findIndex(req => req.requestNo === selectedRequest.requestNo),
-                          bagIndex
-                        )
-                      }
+                      onChange={() => toggleDisposed(bagIndex)}
                     />
                   </td>
                 </tr>
@@ -162,6 +213,9 @@ const DisposingFacility: React.FC = () => {
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowModal(false)}>
             Close
+          </Button>
+          <Button variant="primary" onClick={handleSaveChanges}>
+            Save Changes
           </Button>
         </Modal.Footer>
       </Modal>

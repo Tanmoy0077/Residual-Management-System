@@ -24,6 +24,7 @@ interface FormDetailsData {
   nature_material: string;
   waste_type: string;
   qty: number;
+  disposed: boolean;
 }
 
 interface RequestStatusData {
@@ -33,6 +34,7 @@ interface RequestStatusData {
   sending_engineer: string;
   sender_approval: string;
   receiver_approval: string;
+  disposal_validated: string;
   disposal_confirmation: string;
 }
 
@@ -73,6 +75,7 @@ const SmForm: React.FC = () => {
             category: item.waste_type,
             buildingNo: item.bldg_no,
             qty: Number.parseFloat(item.qty),
+            disposed: false
           }));
           setRows(formattedRows);
         }
@@ -142,6 +145,7 @@ const SmForm: React.FC = () => {
       sending_engineer: localStorage.getItem("name") || "User",
       sender_approval: "No",
       receiver_approval: "No",
+      disposal_validated: "No",
       disposal_confirmation: "No",
     };
     console.log(requestData);
@@ -192,6 +196,7 @@ const SmForm: React.FC = () => {
         nature_material: row.material,
         waste_type: row.category,
         qty: row.qty,
+        disposed: false
       };
       console.log(formData);
 

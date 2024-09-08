@@ -1,34 +1,64 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "../css/DisposingEngineer.css"; // Import the CSS file for styling
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
-// Interface for pending request row
-interface PendingRequest {
-  bagId: string;
-  status: string;
+interface RequestStatus {
+  request_no: number;
+  no_of_items: number;
+  total_qty: string;
+  sending_engineer?: string;
+  sending_manager?: string;
+  receiving_engineer?: string;
+  receiving_manager?: string;
+  disposing_engineer?: string;
+  disposing_manager?: string;
+  sender_approval: "Yes" | "No";
+  make_changes: "Yes" | "No";
+  receiver_approval: "Yes" | "No";
+  receiver_validated: "Yes" | "No";
+  disposal_validated: "Yes" | "No";
+  disposal_confirmation: "Yes" | "No";
 }
 
 // const DisposingEngineer: React.FC = () => {
 //   const userName = 'John Doe'; // Replace with dynamic user name if needed
 
 const DisposingEngineer: React.FC = () => {
-  const userName: string = localStorage.getItem("userName") || "User";
+  const userName: string = localStorage.getItem("name") || "User";
   const facility: string = localStorage.getItem("facility") || "Logged Out";
-  //const [requestStatus, setRequestStatus] = useState<RequestStatus[]>([]);
-  //const [error, setError] = useState<string | null>(null);
+  const [requestStatus, setRequestStatus] = useState<RequestStatus[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
-  // Sample pending requests data
-  const [pendingRequests, setPendingRequests] = useState<PendingRequest[]>([
-    { bagId: "A001", status: "Verify" },
-    { bagId: "A002", status: "Verify" },
-    { bagId: "A003", status: "Verify" },
-  ]);
+  const fetchRequestStatus = async () => {
+    try {
+      const response = await axios.get<RequestStatus[]>(
+        `http://localhost:8000/api/facility_status/${facility}/`
+      );
+      setRequestStatus(response.data);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "An unknown error occurred"
+      );
+    }
+  };
+
+  useEffect(() => {
+    fetchRequestStatus();
+  }, [facility]);
+
+  const navigate = useNavigate();
+
+  if (error) {
+    console.log(error);
+  }
 
   // Handle the "Verify" button click for each row
-  const handleVerify = (index: number) => {
-    const newRequests = [...pendingRequests];
-    newRequests[index].status = "Verified";
-    setPendingRequests(newRequests);
+  const handleVerify = (request_no: number) => {
+    navigate(`/de-form/${request_no}/`)
   };
+
+  console.log(requestStatus);
 
   return (
     <div className="disposing-engineer">
@@ -60,19 +90,26 @@ const DisposingEngineer: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {pendingRequests.map((request, index) => (
-                <tr key={index}>
-                  <td>{request.bagId}</td>
-                  <td>
-                    <button
-                      className="verify-button"
-                      onClick={() => handleVerify(index)}
-                    >
-                      {request.status}
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {requestStatus
+                .filter(
+                  (element) =>
+                    element.disposal_confirmation === "No" &&
+                    element.receiver_approval === "Yes" &&
+                    element.disposal_validated === "No"
+                )
+                .map((request, index) => (
+                  <tr key={index}>
+                    <td>{request.request_no}</td>
+                    <td>
+                      <button
+                        className="verify-button"
+                        onClick={() => handleVerify(request.request_no)}
+                      >
+                        Verify
+                      </button>
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>

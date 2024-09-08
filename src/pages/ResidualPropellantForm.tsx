@@ -21,6 +21,7 @@ interface RequestStatusData {
   sending_engineer: string;
   sender_approval: string;
   receiver_approval: string;
+  disposal_validated: string;
   disposal_confirmation: string;
 }
 
@@ -36,9 +37,11 @@ interface FormDetailsData {
   nature_material: string;
   waste_type: string;
   qty: number;
+  disposed: boolean;
 }
 
 const ResidualPropellantForm: React.FC = () => {
+  const name: string = localStorage.getItem("name") || "User";
   // State for form fields
   const [facility, setFacility] = useState<string>("");
   const [buildingNo, setBuildingNo] = useState<number>();
@@ -48,7 +51,6 @@ const ResidualPropellantForm: React.FC = () => {
   const navigate = useNavigate();
 
   const [generatedNo] = useState<number>(Math.floor(Math.random() * 10000));
-  const navigate = useNavigate();
 
   const [rows, setRows] = useState<Row[]>([
     { slNo: 1, bagId: "", material: "", category: "", buildingNo: 0, qty: 0 },
@@ -92,6 +94,7 @@ const ResidualPropellantForm: React.FC = () => {
       sending_engineer: localStorage.getItem("name") || "User",
       sender_approval: "No",
       receiver_approval: "No",
+      disposal_validated: "No",
       disposal_confirmation: "No"
     };
     console.log(requestData)
@@ -140,6 +143,7 @@ const ResidualPropellantForm: React.FC = () => {
         nature_material: row.material,
         waste_type: row.category,
         qty: row.qty,
+        disposed: false
       };
 
       try {
@@ -364,7 +368,7 @@ const ResidualPropellantForm: React.FC = () => {
         <h3>Requesting Facility</h3>
         <div>
           <label className="mx-3 my-3">Engineer:</label>
-          <input className="mx-5 my-3" type="text" placeholder="Engineer Name and Date" />
+          <input className="mx-5 my-3" type="text" placeholder={name} value={name}/>
           <label className="mx-3 my-3">Manager:</label>
           <input className="mx-5 my-3" type="text" placeholder="Manager Name and Date" />
         </div>
@@ -372,7 +376,7 @@ const ResidualPropellantForm: React.FC = () => {
         <h3>Storage Facility</h3>
         <div className="signature-row">
           <label className="mx-3 my-3">Engineer:</label>
-          <input className="mx-5 my-3" type="text" placeholder="Engineer Name and Date" />
+          <input className="mx-5 my-3" type="text" placeholder="Engineer Name and Date"/>
           <label className="mx-3 my-3">Manager:</label>
           <input className="mx-5 my-3" type="text" placeholder="Manager Name and Date" />
         </div>

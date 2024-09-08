@@ -16,6 +16,7 @@ interface RequestStatus {
   sender_approval: "Yes" | "No";
   make_changes: "Yes" | "No";
   receiver_approval: "Yes" | "No";
+  disposal_validated: "Yes" | "No";
   disposal_confirmation: "Yes" | "No";
 }
 

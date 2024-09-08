@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import 'bootstrap/dist/css/bootstrap.min.css';
-import { Modal, Button } from 'react-bootstrap';
-import "./css/RmForm.css"; // Updated CSS file path
+import "bootstrap/dist/css/bootstrap.min.css";
+import { Modal, Button } from "react-bootstrap";
+import "../css/RmForm.css"; // Updated CSS file path
+import { useParams, useNavigate } from "react-router-dom";
 
 // Define an interface for a table row
 interface Row {
@@ -15,18 +16,15 @@ interface Row {
 }
 
 const RmForm: React.FC = () => {
-  // State for form fields
+  const { request_no } = useParams<{ request_no: string }>();
   const [facility, setFacility] = useState<string>("");
   const [buildingNo, setBuildingNo] = useState<number>();
-  const [unit, setUnit] = useState<string>(""); // State for Unit
+  const [unit, setUnit] = useState<string>("");
   const [dispatchDate, setDispatchDate] = useState<string>("");
   const [motorDetails, setMotorDetails] = useState<string>("");
-  const [generatedNo, setGeneratedNo] = useState<number>(
-    Math.floor(Math.random() * 10000)
-  ); // Generates a random number for "No."
-
-  // State for rows in the table
   const [rows, setRows] = useState<Row[]>([]);
+  const navigate = useNavigate(); // Generates a random number for "No."
+
   const [showSendBackModal, setShowSendBackModal] = useState<boolean>(false);
   const [showAuthorizeModal, setShowAuthorizeModal] = useState<boolean>(false);
   const [remark, setRemark] = useState<string>("");
@@ -34,16 +32,39 @@ const RmForm: React.FC = () => {
 
   // Fetch data from the database on component mount
   useEffect(() => {
-    axios.get('http://localhost:8000/api/form_details/')
-      .then(response => {
+    if (!request_no) return;
+
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:8000/api/request-details/${request_no}/`
+        );
         const data = response.data;
-        setRows(data);
-        // Set other states if needed
-      })
-      .catch(error => {
+
+        if (Array.isArray(data)) {
+          setFacility(data[0].facility_name || "");
+          setBuildingNo(data[0].bldg_no || 0);
+          setUnit(data[0].unit || "");
+          setDispatchDate(data[0].dispatch_date || "");
+          setMotorDetails(data[0].segment_ref_no || "");
+
+          const formattedRows = data.map((item: any) => ({
+            slNo: item.sl_no.split("-")[1],
+            bagId: item.bag_id_no,
+            material: item.nature_material,
+            category: item.waste_type,
+            buildingNo: item.bldg_no,
+            qty: Number.parseFloat(item.qty),
+          }));
+          setRows(formattedRows);
+        }
+      } catch (error) {
         console.error("Error fetching data:", error);
-      });
-  }, []);
+      }
+    };
+
+    fetchData();
+  }, [request_no]);
 
   // Function to calculate the total quantity
   const calculateTotal = (): number => {
@@ -62,33 +83,47 @@ const RmForm: React.FC = () => {
     console.log("Send Back Remark:", remark);
     handleCloseSendBackModal();
     try {
-      await axios.post('http://localhost:8000/api/send_back/', { remark });
+      await axios.put(`http://localhost:8000/api/remarks/${request_no}/`, {
+        rm_remarks: remark,
+      });
+      const make_changes: string = "Yes";
+      await axios.put(
+        `http://localhost:8000/api/request_status/${request_no}/`,
+        { make_changes }
+      );
       alert("Sent back successfully!");
     } catch (error) {
       console.error("Error sending back:", error);
     }
   };
 
-  // Handle authorize remark submission
   const handleAuthorize = async () => {
     console.log("Authorize Remark:", remark);
     handleCloseAuthorizeModal();
     try {
-      await axios.post('http://localhost:8000/api/authorize/', { remark });
+      await axios.post(`http://localhost:8000/api/remarks/`, {
+        request_no: request_no,
+        sm_remarks: "Nothing",
+        rm_remarks: remark,
+      });
       alert("Authorized successfully!");
+      await axios.put(`http://localhost:8000/api/request_status/${request_no}/`, {
+        receiver_approval: "Yes",
+      });
+      navigate("/receiving-manager");
     } catch (error) {
       console.error("Error authorizing:", error);
     }
   };
 
   // Handle form edit
-  const handleEdit = () => {
-    setIsEditable(!isEditable);
-  };
+  // const handleEdit = () => {
+  //   setIsEditable(!isEditable);
+  // };
 
   return (
     <div className="form-container">
-      <div className="header-section text-center">
+      <div className="header-section d-flex flex-column justify-content-center align-items-center">
         <h1>Solid Motor Propellant Complex</h1>
         <h4>Residual Propellant Management System</h4>
         <h4>
@@ -105,10 +140,10 @@ const RmForm: React.FC = () => {
         </p>
         <div className="form-entry">
           <label>No.:</label>
-          <input type="text" value={generatedNo} disabled />
+          <input type="text" value={request_no} disabled />
         </div>
       </div>
-      
+
       <div className="form-content d-flex justify-content-between align-items-center">
         <div className="form-fields w-50">
           <div className="form-entry">
@@ -225,37 +260,73 @@ const RmForm: React.FC = () => {
         <h3>Requesting Facility</h3>
         <div>
           <label className="mx-3 my-3">Engineer:</label>
-          <input className="mx-5 my-3" type="text" placeholder="Engineer Name and Date" disabled={!isEditable} />
+          <input
+            className="mx-5 my-3"
+            type="text"
+            placeholder="Engineer Name and Date"
+            disabled={!isEditable}
+          />
           <label className="mx-3 my-3">Manager:</label>
-          <input className="mx-5 my-3" type="text" placeholder="Manager Name and Date" disabled={!isEditable} />
+          <input
+            className="mx-5 my-3"
+            type="text"
+            placeholder="Manager Name and Date"
+            disabled={!isEditable}
+          />
         </div>
 
         <h3>Storage Facility</h3>
         <div className="signature-row">
           <label className="mx-3 my-3">Engineer:</label>
-          <input className="mx-5 my-3" type="text" placeholder="Engineer Name and Date" disabled={!isEditable} />
+          <input
+            className="mx-5 my-3"
+            type="text"
+            placeholder="Engineer Name and Date"
+            disabled={!isEditable}
+          />
           <label className="mx-3 my-3">Manager:</label>
-          <input className="mx-5 my-3" type="text" placeholder="Manager Name and Date" disabled={!isEditable} />
+          <input
+            className="mx-5 my-3"
+            type="text"
+            placeholder="Manager Name and Date"
+            disabled={!isEditable}
+          />
         </div>
 
         <h3>Disposing Facility</h3>
         <div className="signature-row">
           <label className="mx-3 my-3">Engineer:</label>
-          <input className="mx-5 my-3" type="text" placeholder="Engineer Name and Date" disabled={!isEditable} />
+          <input
+            className="mx-5 my-3"
+            type="text"
+            placeholder="Engineer Name and Date"
+            disabled={!isEditable}
+          />
           <label className="mx-3 my-3">Manager:</label>
-          <input className="mx-5 my-3" type="text" placeholder="Manager Name and Date" disabled={!isEditable} />
+          <input
+            className="mx-5 my-3"
+            type="text"
+            placeholder="Manager Name and Date"
+            disabled={!isEditable}
+          />
         </div>
 
         <div className="button-group">
-          <Button className="btn btn-secondary mx-2" onClick={handleShowSendBackModal}>
+          <Button
+            className="btn btn-secondary mx-2"
+            onClick={handleShowSendBackModal}
+          >
             Send Back
           </Button>
-          <Button className="btn btn-primary mx-2" onClick={handleShowAuthorizeModal}>
+          <Button
+            className="btn btn-primary mx-2"
+            onClick={handleShowAuthorizeModal}
+          >
             Authorize
           </Button>
-          <Button className="btn btn-warning mx-2" onClick={handleEdit}>
+          {/* <Button className="btn btn-warning mx-2" onClick={handleEdit}>
             {isEditable ? "Save" : "Edit"}
-          </Button>
+          </Button> */}
         </div>
       </div>
 

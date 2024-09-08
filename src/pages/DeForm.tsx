@@ -1,6 +1,7 @@
-import React, { useState } from "react";
-import "./css/DeForm.css"; // Import the CSS file for styling
+import React, { useEffect, useState } from "react"; // Import the CSS file for styling
 import axios from "axios";
+import "../css/SmForm.css";
+import { useNavigate, useParams } from "react-router-dom";
 
 // Define an interface for a table row
 interface Row {
@@ -14,21 +15,48 @@ interface Row {
 
 const DeForm: React.FC = () => {
   // State for form fields
+  const { request_no } = useParams<{ request_no: string }>();
   const [facility, setFacility] = useState<string>("");
   const [buildingNo, setBuildingNo] = useState<number>();
   const [unit, setUnit] = useState<string>("");
   const [dispatchDate, setDispatchDate] = useState<string>("");
   const [motorDetails, setMotorDetails] = useState<string>("");
-  const [generatedNo, setGeneratedNo] = useState<number>(
-    Math.floor(Math.random() * 10000)
-  );
+  const [rows, setRows] = useState<Row[]>([]);
+  const navigate = useNavigate();
 
-  // State for rows in the table
-  const [rows, setRows] = useState<Row[]>([
-    { slNo: 1, bagId: "", material: "", category: "", buildingNo: 0, qty: 0 },
-    { slNo: 2, bagId: "", material: "", category: "", buildingNo: 0, qty: 0 },
-    { slNo: 3, bagId: "", material: "", category: "", buildingNo: 0, qty: 0 },
-  ]);
+  useEffect(() => {
+    if (!request_no) return;
+
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:8000/api/request-details/${request_no}/`
+        );
+        const data = response.data;
+
+        if (Array.isArray(data)) {
+          setFacility(data[0].facility_name || "");
+          setBuildingNo(data[0].bldg_no || 0);
+          setUnit(data[0].unit || "");
+          setDispatchDate(data[0].dispatch_date || "");
+          setMotorDetails(data[0].segment_ref_no || "");
+
+          const formattedRows = data.map((item: any) => ({
+            slNo: item.sl_no.split("-")[1],
+            bagId: item.bag_id_no,
+            material: item.nature_material,
+            category: item.waste_type,
+            buildingNo: item.bldg_no,
+            qty: Number.parseFloat(item.qty),
+          }));
+          setRows(formattedRows);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+    fetchData();
+  }, [request_no]);
 
   // State for form edit mode
   const [isEditable, setIsEditable] = useState<boolean>(false);
@@ -64,58 +92,20 @@ const DeForm: React.FC = () => {
 
   // Function to submit the form data via a POST request
   const submitForm = async () => {
-    for (const row of rows) {
-      const formData = {
-        facility_name: facility,
-        bldg_no: buildingNo,
-        unit: unit,
-        segment_ref_no: motorDetails,
-        dispatch_date: dispatchDate,
-        bag_id_no: row.bagId,
-        nature_material: row.material,
-        waste_type: row.category,
-        qty: row.qty,
-      };
-
-      console.log(formData);
-
-      try {
-        const response = await axios.post(
-          "http://localhost:8000/api/form_details/",
-          formData,
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        if (response.status === 201) {
-          console.log("Server Response:", response.data);
-        } else {
-          console.error("Error:", response.statusText);
-        }
-      } catch (error: any) {
-        if (error.response) {
-          console.error("Server Error:", error.response.data);
-          alert(
-            `An error occurred: ${
-              error.response.data.message || "Please try again later."
-            }`
-          );
-        } else if (error.request) {
-          console.error("No response received:", error.request);
-          alert("No response received from the server. Please try again.");
-        } else {
-          console.error("Error setting up the request:", error.message);
-          alert(`Error: ${error.message}`);
-        }
-        return;
-      }
+    try {
+      const disposal_validated: string = "Yes";
+      await axios.put(
+        `http://localhost:8000/api/request_status/${request_no}/`,
+        { disposal_validated }
+      );
+      alert("Form verified successfully!");
+      navigate("/disposing-engineer");
+    } catch (error) {
+      console.error("Error authorizing form:", error);
     }
-
-    alert("Form submitted successfully!");
   };
+
+
 
   return (
     <div className="form-container">
@@ -136,7 +126,7 @@ const DeForm: React.FC = () => {
         </p>
         <div className="w-1">
           <label>No.:</label>
-          <input type="text" value={generatedNo} disabled />
+          <input type="text" value={request_no} disabled />
         </div>
       </div>
 
@@ -310,31 +300,55 @@ const DeForm: React.FC = () => {
         <h3>Requesting Facility</h3>
         <div>
           <label className="mx-3 my-3">Engineer:</label>
-          <input className="mx-5 my-3" type="text" placeholder="Engineer Name and Date" />
+          <input
+            className="mx-5 my-3"
+            type="text"
+            placeholder="Engineer Name and Date"
+          />
           <label className="mx-3 my-3">Manager:</label>
-          <input className="mx-5 my-3" type="text" placeholder="Manager Name and Date" />
+          <input
+            className="mx-5 my-3"
+            type="text"
+            placeholder="Manager Name and Date"
+          />
         </div>
 
         <h3>Storage Facility</h3>
         <div className="signature-row">
           <label className="mx-3 my-3">Engineer:</label>
-          <input className="mx-5 my-3" type="text" placeholder="Engineer Name and Date" />
+          <input
+            className="mx-5 my-3"
+            type="text"
+            placeholder="Engineer Name and Date"
+          />
           <label className="mx-3 my-3">Manager:</label>
-          <input className="mx-5 my-3" type="text" placeholder="Manager Name and Date" />
+          <input
+            className="mx-5 my-3"
+            type="text"
+            placeholder="Manager Name and Date"
+          />
         </div>
 
         <h3>Disposing Facility</h3>
         <div className="signature-row">
           <label className="mx-3 my-3">Engineer:</label>
-          <input className="mx-5 my-3" type="text" placeholder="Engineer Name and Date" />
+          <input
+            className="mx-5 my-3"
+            type="text"
+            placeholder="Engineer Name and Date"
+          />
           <label className="mx-3 my-3">Manager:</label>
-          <input className="mx-5 my-3" type="text" placeholder="Manager Name and Date" />
+          <input
+            className="mx-5 my-3"
+            type="text"
+            placeholder="Manager Name and Date"
+          />
         </div>
 
         <div className="form-actions">
-          <button className="submit-button" onClick={() => setIsEditable(true)}>
+          {/* <button className="submit-button" onClick={() => setIsEditable(true)}>
             Edit
-          </button>
+          </button> */}
           <button className="submit-button ml-3" onClick={submitForm}>
             Verify
           </button>

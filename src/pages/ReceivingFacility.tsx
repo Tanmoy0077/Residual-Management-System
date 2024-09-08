@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import '../css/ReceivingFacility.css'; // Import the CSS file for styling
-import axios from 'axios';
+import React, { useEffect, useState } from "react";
+import "../css/ReceivingFacility.css"; // Import the CSS file for styling
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 interface RequestStatus {
   request_no: number;
@@ -16,18 +17,21 @@ interface RequestStatus {
   make_changes: "Yes" | "No";
   receiver_approval: "Yes" | "No";
   receiver_validated: "Yes" | "No";
+  disposal_validated: "Yes" | "No";
   disposal_confirmation: "Yes" | "No";
 }
 
 const ReceivingFacility: React.FC = () => {
-  const userName: string = localStorage.getItem("userName") || "User";
+  const userName: string = localStorage.getItem("name") || "User";
   const facility: string = localStorage.getItem("facility") || "Logged Out";
   const [requestStatus, setRequestStatus] = useState<RequestStatus[]>([]);
   const [error, setError] = useState<string | null>(null);
+  
+  const navigate = useNavigate();
   const fetchRequestStatus = async () => {
     try {
       const response = await axios.get<RequestStatus[]>(
-        `http://localhost:8000/api/request_status/${facility}/`
+        `http://localhost:8000/api/facility_status/${facility}/`
       );
       setRequestStatus(response.data);
     } catch (err) {
@@ -44,6 +48,10 @@ const ReceivingFacility: React.FC = () => {
   if (error) {
     return <p>Error: {error}</p>;
   }
+
+  const validateManager = (request_no: number) => {
+    navigate(`/rm-form/${request_no}`);
+  };
 
   return (
     <div className="receiving-facility">
@@ -70,14 +78,27 @@ const ReceivingFacility: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {requestStatus.filter((element) => element.receiver_approval === "No").map((request, index) => (
-                <tr key={index}>
-                  <td>{request.request_no}</td>
-                  <td>
-                    <button className="status-button">Authorize</button>
-                  </td>
-                </tr>
-              ))}
+              {requestStatus
+                .filter(
+                  (element) =>
+                    element.receiver_approval === "No" &&
+                    element.receiver_validated === "Yes"
+                )
+                .map((request, index) => (
+                  <tr key={index}>
+                    <td>{request.request_no}</td>
+                    <td>
+                      <button
+                        className="status-button"
+                        onClick={() => {
+                          validateManager(request.request_no);
+                        }}
+                      >
+                        Authorize
+                      </button>
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>

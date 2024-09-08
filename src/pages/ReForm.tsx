@@ -5,7 +5,6 @@ import { Modal, Button, Table } from "react-bootstrap";
 import "../css/ReForm.css"; // Updated CSS file path
 import { useNavigate, useParams } from "react-router-dom";
 
-// Define an interface for a table row
 interface Row {
   slNo: number;
   bagId: string;
