@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "../css/ResidualPropellantForm.css"; // Import the CSS file for styling
+import "../css/ResidualPropellantForm.css";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
@@ -48,6 +48,7 @@ const ResidualPropellantForm: React.FC = () => {
   const navigate = useNavigate();
 
   const [generatedNo] = useState<number>(Math.floor(Math.random() * 10000));
+  const navigate = useNavigate();
 
   const [rows, setRows] = useState<Row[]>([
     { slNo: 1, bagId: "", material: "", category: "", buildingNo: 0, qty: 0 },
