@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import "../css/ReceivingEngineer.css"; // Import the CSS file for styling
+import "../css/ReceivingEngineer.css";
 import axios from "axios";
-
+import { useNavigate } from "react-router-dom";
 
 interface RequestStatus {
   request_no: number;
@@ -21,14 +21,15 @@ interface RequestStatus {
 }
 
 const ReceivingEngineer: React.FC = () => {
-  const userName: string = localStorage.getItem("userName") || "User";
+  const userName: string = localStorage.getItem("name") || "User";
   const facility: string = localStorage.getItem("facility") || "Logged Out";
   const [requestStatus, setRequestStatus] = useState<RequestStatus[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
   const fetchRequestStatus = async () => {
     try {
       const response = await axios.get<RequestStatus[]>(
-        `http://localhost:8000/api/request_status/${facility}/`
+        `http://localhost:8000/api/facility_status/${facility}/`
       );
       setRequestStatus(response.data);
     } catch (err) {
@@ -45,6 +46,10 @@ const ReceivingEngineer: React.FC = () => {
   if (error) {
     return <p>Error: {error}</p>;
   }
+
+  const validateEngineer = (request_no: number) => {
+    navigate(`/re-form/${request_no}`);
+  };
 
   return (
     <div className="receiving-engineer">
@@ -77,12 +82,16 @@ const ReceivingEngineer: React.FC = () => {
               </thead>
               <tbody>
                 {requestStatus
-                  .filter((element) => element.receiver_validated === "No")
+                  .filter(
+                    (element) =>
+                      element.receiver_validated === "No" &&
+                      element.sender_approval === "Yes"
+                  )
                   .map((request, index) => (
                     <tr key={index}>
                       <td>{request.request_no}</td>
                       <td>
-                        <button className="validate-button">Validate</button>
+                        <button className="validate-button" onClick={() => {validateEngineer(request.request_no)}}>Validate</button>
                       </td>
                     </tr>
                   ))}
@@ -101,7 +110,12 @@ const ReceivingEngineer: React.FC = () => {
               </thead>
               <tbody>
                 {requestStatus
-                  .filter((element) => element.receiver_approval === "No")
+                  .filter(
+                    (element) =>
+                      element.receiver_approval === "No" &&
+                      element.sender_approval === "Yes" &&
+                      element.receiver_validated === "Yes"
+                  )
                   .map((request, index) => (
                     <tr key={index}>
                       <td>{request.request_no}</td>

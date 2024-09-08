@@ -11,6 +11,7 @@ import ReceivingFacility from './pages/ReceivingFacility';
 import DisposingFacility from './pages/DisposingFacility';
 import ResidualPropellantForm from './pages/ResidualPropellantForm';
 import SmForm from './pages/SmForm';
+import ReForm from './pages/ReForm';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/create-form" element={<ResidualPropellantForm />} />
         <Route path="/sm-form/:request_no" element={<SmForm />} />
+        <Route path="/re-form/:request_no" element={<ReForm />} />
         <Route path="/login" element={<LoginPage/>} />
         <Route
           path="/admin"
