@@ -50,6 +50,10 @@ const SendingEngineer: React.FC = () => {
     navigate(`/create-form`);
   };
 
+  if(error){
+    console.log(error)
+  }
+
   return (
     <div className="sending-engineer">
       <AppNavbar />

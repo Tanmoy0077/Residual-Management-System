@@ -140,7 +140,6 @@ const ResidualPropellantForm: React.FC = () => {
         waste_type: row.category,
         qty: row.qty,
       };
-      console.log(formData);
 
       try {
         const response = await axios.post(`http://localhost:8000/api/form_details/`, formData);

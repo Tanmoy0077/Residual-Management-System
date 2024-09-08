@@ -47,6 +47,10 @@ const SendingFacility: React.FC = () => {
     navigate(`/sm-form/${request_no}`);
   };
 
+  if(error){
+    console.log(error)
+  }
+
   return (
     <div className="sending-facility">
       <nav className="navbar">
@@ -73,7 +77,7 @@ const SendingFacility: React.FC = () => {
             </thead>
             <tbody>
               {requestStatus
-                .filter((el) => el.make_changes === "No")
+                .filter((el) => el.make_changes === "No" && el.sender_approval === 'No')
                 .map((request, index) => (
                   <tr key={index}>
                     <td>{request.request_no}</td>
