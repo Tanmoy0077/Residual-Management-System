@@ -16,6 +16,13 @@ interface Row {
 
 
 const ReForm: React.FC = () => {
+  const name: string = localStorage.getItem("name") || "User";
+  const date = new Date();
+  const day = date.getDay();
+  const month = date.getMonth();
+  const year = date.getFullYear();
+  const full_date = ` ${day}-${month}-${year}`;
+  const sign = name + full_date;
   const { request_no } = useParams<{ request_no: string }>();
   const [facility, setFacility] = useState<string>("");
   const [buildingNo, setBuildingNo] = useState<number>();
@@ -25,6 +32,8 @@ const ReForm: React.FC = () => {
   const [rows, setRows] = useState<Row[]>([]);
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState<boolean>(false);
+  const [sending_engineer, setSendingEngineer] = useState<string>("");
+  const [sending_manager, setSendingManager] = useState<string>("");
   // const [bagNo, setBagNo] = useState<string>("");
   // const [existingBags, setExistingBags] = useState<string[]>([]);
 
@@ -56,6 +65,11 @@ const ReForm: React.FC = () => {
           }));
           setRows(formattedRows);
         }
+        const engineer_response = await axios.get(`http://localhost:8000/api/facility_status/${facility}/`);
+        setSendingEngineer(engineer_response.data[0].sending_engineer || "")
+        setSendingManager(engineer_response.data[0].sending_manager || "")
+        console.log(sending_engineer)
+        console.log(sending_manager)
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -80,6 +94,9 @@ const ReForm: React.FC = () => {
         `http://localhost:8000/api/request_status/${request_no}/`,
         { receiver_validated }
       );
+
+      await axios.put(`http://localhost:8000/api/request_status/${request_no}/`,
+         { receiving_engineer: sign });
       alert("Form validated successfully!");
       navigate("/receiving-engineer");
     } catch (error) {
@@ -259,6 +276,7 @@ const ReForm: React.FC = () => {
             className="mx-5 my-3"
             type="text"
             placeholder="Engineer Name and Date"
+            value={sending_engineer}
             disabled
           />
           <label className="mx-3 my-3">Manager:</label>
@@ -266,6 +284,7 @@ const ReForm: React.FC = () => {
             className="mx-5 my-3"
             type="text"
             placeholder="Manager Name and Date"
+            value={sending_manager}
             disabled
           />
         </div>
@@ -277,6 +296,7 @@ const ReForm: React.FC = () => {
             className="mx-5 my-3"
             type="text"
             placeholder="Engineer Name and Date"
+            value={sign}
             disabled
           />
           <label className="mx-3 my-3">Manager:</label>

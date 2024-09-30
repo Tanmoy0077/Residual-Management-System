@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Modal, Button } from "react-bootstrap";
 import axios from "axios";
 import "../css/DisposingFacility.css";
+import { useNavigate } from "react-router-dom";
+import AppNavbar from "../components/AppNavbar";
 
 interface Bag {
   sl_no: string;
@@ -38,9 +40,11 @@ interface RequestStatus {
 const DisposingFacility: React.FC = () => {
   const userName: string = localStorage.getItem("name") || "User";
   const facility: string = localStorage.getItem("facility") || "Logged Out";
-
+  const navigate = useNavigate();
   const [showModal, setShowModal] = useState<boolean>(false);
-  const [selectedRequest, setSelectedRequest] = useState<RequestStatus | null>(null);
+  const [selectedRequest, setSelectedRequest] = useState<RequestStatus | null>(
+    null
+  );
   const [requestDetails, setRequestDetails] = useState<Bag[]>([]);
   const [requestStatus, setRequestStatus] = useState<RequestStatus[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -71,7 +75,9 @@ const DisposingFacility: React.FC = () => {
     setShowModal(true);
 
     axios
-      .get<Bag[]>(`http://localhost:8000/api/request-details/${request.request_no}/`)
+      .get<Bag[]>(
+        `http://localhost:8000/api/request-details/${request.request_no}/`
+      )
       .then((response) => {
         setRequestDetails(response.data);
       })
@@ -83,15 +89,15 @@ const DisposingFacility: React.FC = () => {
   const toggleDisposed = (bagIndex: number) => {
     const updatedDetails = [...requestDetails];
     updatedDetails[bagIndex].disposed = !updatedDetails[bagIndex].disposed;
-
-    const totalBags = updatedDetails.length;
-    const disposedBags = updatedDetails.filter((bag) => bag.disposed).length;
-    const updatedRequest = selectedRequest
-      ? { ...selectedRequest, disposedQty: `${disposedBags}/${totalBags}` }
-      : null;
-
     setRequestDetails(updatedDetails);
-    setSelectedRequest(updatedRequest);
+
+    // Recalculate disposedQty for the selectedRequest
+    if (selectedRequest) {
+      const totalBags = updatedDetails.length;
+      const disposedBags = updatedDetails.filter((bag) => bag.disposed).length;
+      const updatedRequest = { ...selectedRequest, disposedQty: `${disposedBags}/${totalBags}` };
+      setSelectedRequest(updatedRequest);
+    }
   };
 
   const handleSaveChanges = () => {
@@ -112,9 +118,13 @@ const DisposingFacility: React.FC = () => {
     }
   };
 
+  const handleConfirm = (request_no: number) => {
+    navigate(`/dm-form/${request_no}/`);
+  };
+
   return (
     <div className="full-screen-container">
-      <nav className="navbar">
+      {/* <nav className="navbar">
         <div className="navbar-left">
           <h1>Disposing Facility</h1>
         </div>
@@ -122,9 +132,11 @@ const DisposingFacility: React.FC = () => {
           <button className="nav-button">Confirmed Requests</button>
           <button className="nav-button">Logout</button>
         </div>
-      </nav>
+      </nav> */}
+      <AppNavbar />
 
       <div className="welcome-message">
+        <h1>Disposing Facility</h1>
         <h2>Welcome Back, {userName}</h2>
       </div>
 
@@ -147,9 +159,14 @@ const DisposingFacility: React.FC = () => {
                   element.disposal_confirmation === "No"
               )
               .map((request, requestIndex) => {
-               
-                const totalBags = requestDetails.length;
-                const disposedBags = requestDetails.filter((bag) => bag.disposed).length;
+                // Find the corresponding request details
+                const filteredDetails = requestDetails.filter(
+                  (bag) => bag.sl_no.startsWith(request.request_no.toString())
+                );
+                const totalBags = filteredDetails.length;
+                const disposedBags = filteredDetails.filter(
+                  (bag) => bag.disposed
+                ).length;
                 const disposedQty = `${disposedBags}/${totalBags}`;
                 const allBagsChecked = disposedBags === totalBags;
 
@@ -169,6 +186,9 @@ const DisposingFacility: React.FC = () => {
                       <button
                         className="confirm-button"
                         disabled={!allBagsChecked}
+                        onClick={() => {
+                          handleConfirm(request.request_no);
+                        }}
                       >
                         Confirm
                       </button>
@@ -224,3 +244,4 @@ const DisposingFacility: React.FC = () => {
 };
 
 export default DisposingFacility;
+

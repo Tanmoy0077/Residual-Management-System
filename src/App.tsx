@@ -15,8 +15,8 @@ import ReForm from './pages/ReForm';
 import RmForm from './pages/RmForm';
 import DisposingEngineer from './pages/DisposingEngineer';
 import DeForm from './pages/DeForm';
-// import DeForm from './pages/DeForm';
-// import DmForm from './pages/DmForm';
+import DmForm from './pages/DmForm';
+import Dashboard from './pages/Dashboard';
 
 function App() {
   return (
@@ -28,7 +28,7 @@ function App() {
         <Route path="/re-form/:request_no" element={<ReForm />} />
         <Route path="/rm-form/:request_no" element={<RmForm />} />
         <Route path="/de-form/:request_no" element={<DeForm />} />
-        {/* <Route path="/dm-form/:request_no" element={<DmForm />} /> */}
+        <Route path="/dm-form/:request_no" element={<DmForm />} />
         <Route path="/login" element={<LoginPage/>} />
         <Route
           path="/admin"
@@ -83,6 +83,14 @@ function App() {
           element={
             <ProtectedRoute requiredDesignation="disposing manager">
               <DisposingFacility />
+            </ProtectedRoute>
+          }
+        />
+         <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute requiredDesignation="director">
+              <Dashboard />
             </ProtectedRoute>
           }
         />

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import "../css/SendingFacility.css";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import AppNavbar from "../components/AppNavbar";
 
 interface RequestStatus {
   request_no: number;
@@ -54,17 +55,10 @@ const SendingFacility: React.FC = () => {
 
   return (
     <div className="sending-facility">
-      <nav className="navbar">
-        <div className="navbar-left">
-          <h1>Requesting Facility</h1>
-        </div>
-        <div className="navbar-right">
-          <button className="nav-button">Authorized Requests</button>
-          <button className="nav-button">Logout</button>
-        </div>
-      </nav>
+      <AppNavbar />
       <div className="main-content">
         <div className="welcome-message">
+          <h1>Requesting Facility</h1>
           <h2>Welcome Back, {userName}!</h2>
         </div>
         <div className="pending-requests">

@@ -51,10 +51,6 @@ const LoginPage: React.FC = () => {
           <button type="submit" className="submit">
             Sign in
           </button>
-          <p className="signup-link">
-            No account?
-            <a href="/signup">Sign up</a>
-          </p>
         </form>
       </div>
       {error && (

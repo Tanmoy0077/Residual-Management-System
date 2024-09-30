@@ -1,95 +1,94 @@
 .container {
-    padding: 20px;
-    max-width: 800px;
-    margin: auto;
-  }
-  
-  .header {
-    text-align: center;
-    margin-bottom: 20px;
-  }
-  
-  .header h1 {
-    margin: 0;
-  }
-  
-  .note {
-    font-size: 0.8em;
-    color: #555;
-  }
-  
-  .data-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 10px; /* Adjusted margin to fit note below the table */
-  }
-  
-  .data-table th, .data-table td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: left;
-  }
-  
-  .data-table th {
-    background-color: #f4f4f4;
-  }
-  
-  .table-note {
-    font-size: 0.8em;
-    color: #555;
-    margin-bottom: 20px; /* Space between table note and form fields */
-  }
-  
-  .form-fields {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 20px;
-  }
-  
-  .field-group {
-    flex: 1;
-    margin: 0 10px;
-  }
-  
-  .field-group label {
-    display: block;
-    margin-bottom: 5px;
-  }
-  
-  .field-group input {
-    width: 100%;
-    padding: 8px;
-    box-sizing: border-box;
-  }
-  
-  .footer {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 20px;
-  }
-  
-  .footer-text {
-    flex: 1;
-    margin: 0 10px;
-  }
-  
-  .footer-text label {
-    display: block;
-    margin-bottom: 5px;
-  }
-  
-  .footer-text input {
-    width: 100%;
-    padding: 8px;
-    box-sizing: border-box;
-  }
-  
-  .submit-button {
-    text-align: center;
-  }
-  
-  .submit-button button {
-    padding: 10px 20px;
-    font-size: 16px;
-  }
-  
+  padding: 20px;
+  max-width: 800px;
+  margin: auto;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.header h1 {
+  margin: 0;
+}
+
+.note {
+  font-size: 0.8em;
+  color: #555;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 10px; /* Adjusted margin to fit note below the table */
+}
+
+.data-table th, .data-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.data-table th {
+  background-color: #f4f4f4;
+}
+
+.table-note {
+  font-size: 0.8em;
+  color: #555;
+  margin-bottom: 20px; /* Space between table note and form fields */
+}
+
+.form-fields {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.field-group {
+  flex: 1;
+  margin: 0 10px;
+}
+
+.field-group label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.field-group input {
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.footer-text {
+  flex: 1;
+  margin: 0 10px;
+}
+
+.footer-text label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.footer-text input {
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+}
+
+.submit-button {
+  text-align: center;
+}
+
+.submit-button button {
+  padding: 10px 20px;
+  font-size: 16px;
+}

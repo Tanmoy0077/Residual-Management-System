@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import "../css/ReceivingFacility.css"; // Import the CSS file for styling
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import AppNavbar from "../components/AppNavbar";
 
 interface RequestStatus {
   request_no: number;
@@ -55,7 +56,7 @@ const ReceivingFacility: React.FC = () => {
 
   return (
     <div className="receiving-facility">
-      <nav className="navbar">
+      {/* <nav className="navbar">
         <div className="navbar-left">
           <h1>Storage Facility</h1>
         </div>
@@ -63,9 +64,11 @@ const ReceivingFacility: React.FC = () => {
           <button className="nav-button">Authorized Requests</button>
           <button className="nav-button">Logout</button>
         </div>
-      </nav>
+      </nav> */}
+      <AppNavbar />
       <div className="main-content">
         <div className="welcome-message">
+          <h1>Storage Facility</h1>
           <h2>Welcome Back, {userName}!</h2>
         </div>
         <div className="pending-requests">

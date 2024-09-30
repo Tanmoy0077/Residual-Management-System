@@ -15,6 +15,13 @@ interface Row {
 
 const DeForm: React.FC = () => {
   // State for form fields
+  const name: string = localStorage.getItem("name") || "User";
+  const date = new Date();
+  const day = date.getDay();
+  const month = date.getMonth();
+  const year = date.getFullYear();
+  const full_date = ` ${day}-${month}-${year}`;
+  const sign = name + full_date;
   const { request_no } = useParams<{ request_no: string }>();
   const [facility, setFacility] = useState<string>("");
   const [buildingNo, setBuildingNo] = useState<number>();
@@ -22,6 +29,10 @@ const DeForm: React.FC = () => {
   const [dispatchDate, setDispatchDate] = useState<string>("");
   const [motorDetails, setMotorDetails] = useState<string>("");
   const [rows, setRows] = useState<Row[]>([]);
+  const [sending_engineer, setSendingEngineer] = useState<string>("");
+  const [sending_manager, setSendingManager] = useState<string>(""); // State to manage edit mode
+  const [receiving_engineer, setReceivingEngineer] = useState<string>("");
+  const [receiving_manager, setReceivingManager] = useState<string>("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -51,6 +62,11 @@ const DeForm: React.FC = () => {
           }));
           setRows(formattedRows);
         }
+        const engineer_response = await axios.get(`http://localhost:8000/api/facility_status/${facility}/`);
+        setSendingEngineer(engineer_response.data[0].sending_engineer || "")
+        setSendingManager(engineer_response.data[0].sending_manager || "")
+        setReceivingEngineer(engineer_response.data[0].receiving_engineer || "")
+        setReceivingManager(engineer_response.data[0].receiving_manager || "")
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -98,6 +114,7 @@ const DeForm: React.FC = () => {
         `http://localhost:8000/api/request_status/${request_no}/`,
         { disposal_validated }
       );
+      await axios.put(`http://localhost:8000/api/request_status/${request_no}/`, {disposing_engineer: sign});
       alert("Form verified successfully!");
       navigate("/disposing-engineer");
     } catch (error) {
@@ -304,12 +321,14 @@ const DeForm: React.FC = () => {
             className="mx-5 my-3"
             type="text"
             placeholder="Engineer Name and Date"
+            value={sending_engineer}
           />
           <label className="mx-3 my-3">Manager:</label>
           <input
             className="mx-5 my-3"
             type="text"
             placeholder="Manager Name and Date"
+            value={sending_manager}
           />
         </div>
 
@@ -320,12 +339,14 @@ const DeForm: React.FC = () => {
             className="mx-5 my-3"
             type="text"
             placeholder="Engineer Name and Date"
+            value={receiving_engineer}
           />
           <label className="mx-3 my-3">Manager:</label>
           <input
             className="mx-5 my-3"
             type="text"
             placeholder="Manager Name and Date"
+            value={receiving_manager}
           />
         </div>
 
@@ -336,6 +357,7 @@ const DeForm: React.FC = () => {
             className="mx-5 my-3"
             type="text"
             placeholder="Engineer Name and Date"
+            value={sign}
           />
           <label className="mx-3 my-3">Manager:</label>
           <input

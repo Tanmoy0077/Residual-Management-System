@@ -1,6 +1,7 @@
-import React, { useState } from "react";
-import "./css/DmForm.css"; // Import the CSS file for styling
+import React, { useEffect, useState } from "react";
+import "../css/DmForm.css"; // Import the CSS file for styling
 import axios from "axios";
+import { useParams, useNavigate } from "react-router-dom";
 
 // Define an interface for a table row
 interface Row {
@@ -13,25 +14,70 @@ interface Row {
 }
 
 const DmForm: React.FC = () => {
-  // State for form fields
+  const name: string = localStorage.getItem("name") || "User";
+  const date = new Date();
+  const day = date.getDay();
+  const month = date.getMonth();
+  const year = date.getFullYear();
+  const full_date = ` ${day}-${month}-${year}`;
+  const sign = name + full_date;
+  const { request_no } = useParams<{ request_no: string }>();
   const [facility, setFacility] = useState<string>("");
   const [buildingNo, setBuildingNo] = useState<number>();
   const [unit, setUnit] = useState<string>("");
   const [dispatchDate, setDispatchDate] = useState<string>("");
   const [motorDetails, setMotorDetails] = useState<string>("");
-  const [generatedNo, setGeneratedNo] = useState<number>(
-    Math.floor(Math.random() * 10000)
-  );
-
-  // State for rows in the table
-  const [rows, setRows] = useState<Row[]>([
-    { slNo: 1, bagId: "", material: "", category: "", buildingNo: 0, qty: 0 },
-    { slNo: 2, bagId: "", material: "", category: "", buildingNo: 0, qty: 0 },
-    { slNo: 3, bagId: "", material: "", category: "", buildingNo: 0, qty: 0 },
-  ]);
+  const [rows, setRows] = useState<Row[]>([]);
+  const [sending_engineer, setSendingEngineer] = useState<string>("");
+  const [sending_manager, setSendingManager] = useState<string>(""); // State to manage edit mode
+  const [receiving_engineer, setReceivingEngineer] = useState<string>("");
+  const [receiving_manager, setReceivingManager] = useState<string>("");
+  const [disposing_engineer, setDisposingEngineer] = useState<string>("");
+  const navigate = useNavigate();
 
   // State for form edit mode
   const [isEditable, setIsEditable] = useState<boolean>(false);
+  useEffect(() => {
+    if (!request_no) return;
+
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:8000/api/request-details/${request_no}/`
+        );
+        const data = response.data;
+
+        if (Array.isArray(data)) {
+          setFacility(data[0].facility_name || "");
+          setBuildingNo(data[0].bldg_no || 0);
+          setUnit(data[0].unit || "");
+          setDispatchDate(data[0].dispatch_date || "");
+          setMotorDetails(data[0].segment_ref_no || "");
+
+          const formattedRows = data.map((item: any) => ({
+            slNo: item.sl_no.split("-")[1],
+            bagId: item.bag_id_no,
+            material: item.nature_material,
+            category: item.waste_type,
+            buildingNo: item.bldg_no,
+            qty: Number.parseFloat(item.qty),
+          }));
+          setRows(formattedRows);
+        }
+        const engineer_response = await axios.get(`http://localhost:8000/api/facility_status/${facility}/`);
+        setSendingEngineer(engineer_response.data[0].sending_engineer || "")
+        setSendingManager(engineer_response.data[0].sending_manager || "")
+        setReceivingEngineer(engineer_response.data[0].receiving_engineer || "")
+        setReceivingManager(engineer_response.data[0].receiving_manager || "")
+        setDisposingEngineer(engineer_response.data[0].disposing_engineer || "")
+
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, [request_no]);
 
   // Function to handle adding a new row to the table
   const addRow = () => {
@@ -64,33 +110,33 @@ const DmForm: React.FC = () => {
 
   // Function to submit the form data via a POST request
   const submitForm = async () => {
+
     for (const row of rows) {
       const formData = {
+        sl_no: request_no + "-" + row.slNo,
+        request_no: request_no,
         facility_name: facility,
-        bldg_no: buildingNo,
         unit: unit,
         segment_ref_no: motorDetails,
         dispatch_date: dispatchDate,
         bag_id_no: row.bagId,
         nature_material: row.material,
         waste_type: row.category,
-        qty: row.qty,
+        stored_qty: 0,
+        remarks: "all good",
+        disposed_qty: row.qty
       };
-
-      console.log(formData);
 
       try {
         const response = await axios.post(
-          "http://localhost:8000/api/form_details/",
+          `http://localhost:8000/api/disposal_details/`,
           formData,
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
         );
 
-        if (response.status === 201) {
+        await axios.put(`http://localhost:8000/api/request_status/${request_no}/`, { disposal_confirmation: "Yes", disposing_manager: sign });
+        // await axios.put(`http://localhost:8000/api/request_status/${request_no}/`, {disposing_manager: sign});
+
+        if (response.status === 200) {
           console.log("Server Response:", response.data);
         } else {
           console.error("Error:", response.statusText);
@@ -99,8 +145,7 @@ const DmForm: React.FC = () => {
         if (error.response) {
           console.error("Server Error:", error.response.data);
           alert(
-            `An error occurred: ${
-              error.response.data.message || "Please try again later."
+            `An error occurred: ${error.response.data.message || "Please try again later."
             }`
           );
         } else if (error.request) {
@@ -114,7 +159,8 @@ const DmForm: React.FC = () => {
       }
     }
 
-    alert("Form submitted successfully!");
+    alert("Confirmed successfully!");
+    navigate("/disposing-manager");
   };
 
   return (
@@ -136,7 +182,7 @@ const DmForm: React.FC = () => {
         </p>
         <div className="w-1">
           <label>No.:</label>
-          <input type="text" value={generatedNo} disabled />
+          <input type="text" value={request_no} disabled />
         </div>
       </div>
 
@@ -310,31 +356,31 @@ const DmForm: React.FC = () => {
         <h3>Requesting Facility</h3>
         <div>
           <label className="mx-3 my-3">Engineer:</label>
-          <input className="mx-5 my-3" type="text" placeholder="Engineer Name and Date" />
+          <input className="mx-5 my-3" type="text" placeholder="Engineer Name and Date" value={sending_engineer} />
           <label className="mx-3 my-3">Manager:</label>
-          <input className="mx-5 my-3" type="text" placeholder="Manager Name and Date" />
+          <input className="mx-5 my-3" type="text" placeholder="Manager Name and Date" value={sending_manager} />
         </div>
 
         <h3>Storage Facility</h3>
         <div className="signature-row">
           <label className="mx-3 my-3">Engineer:</label>
-          <input className="mx-5 my-3" type="text" placeholder="Engineer Name and Date" />
+          <input className="mx-5 my-3" type="text" placeholder="Engineer Name and Date" value={receiving_engineer} />
           <label className="mx-3 my-3">Manager:</label>
-          <input className="mx-5 my-3" type="text" placeholder="Manager Name and Date" />
+          <input className="mx-5 my-3" type="text" placeholder="Manager Name and Date" value={receiving_manager} />
         </div>
 
         <h3>Disposing Facility</h3>
         <div className="signature-row">
           <label className="mx-3 my-3">Engineer:</label>
-          <input className="mx-5 my-3" type="text" placeholder="Engineer Name and Date" />
+          <input className="mx-5 my-3" type="text" placeholder="Engineer Name and Date" value={disposing_engineer} />
           <label className="mx-3 my-3">Manager:</label>
-          <input className="mx-5 my-3" type="text" placeholder="Manager Name and Date" />
+          <input className="mx-5 my-3" type="text" placeholder="Manager Name and Date" value={sign} />
         </div>
 
         <div className="form-actions">
-          <button className="submit-button" onClick={() => setIsEditable(true)}>
+          {/* <button className="submit-button" onClick={() => setIsEditable(true)}>
             Edit
-          </button>
+          </button> */}
           <button className="submit-button ml-3" onClick={submitForm}>
             Confirm
           </button>

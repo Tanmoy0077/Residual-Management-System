@@ -39,6 +39,13 @@ interface RequestStatusData {
 }
 
 const SmForm: React.FC = () => {
+  const name: string = localStorage.getItem("name") || "User";
+  const date = new Date();
+  const day = date.getDay();
+  const month = date.getMonth();
+  const year = date.getFullYear();
+  const full_date = ` ${day}-${month}-${year}`;
+  const sign = name + full_date;
   const { request_no } = useParams<{ request_no: string }>();
   const [facility, setFacility] = useState<string>("");
   const [buildingNo, setBuildingNo] = useState<number>();
@@ -50,6 +57,7 @@ const SmForm: React.FC = () => {
   const [showRemarksModal, setShowRemarksModal] = useState<boolean>(false);
   const [remarks, setRemarks] = useState<string>("");
   const navigate = useNavigate();
+  const [sending_engineer, setSendingEngineer] = useState<string>("");
 
   useEffect(() => {
     if (!request_no) return;
@@ -59,6 +67,7 @@ const SmForm: React.FC = () => {
         const response = await axios.get(
           `http://localhost:8000/api/request-details/${request_no}/`
         );
+
         const data = response.data;
 
         if (Array.isArray(data)) {
@@ -79,6 +88,10 @@ const SmForm: React.FC = () => {
           }));
           setRows(formattedRows);
         }
+
+        const engineer_response = await axios.get(`http://localhost:8000/api/facility_status/${facility}/`);
+        setSendingEngineer(engineer_response.data[0].sending_engineer || "")
+        console.log(sending_engineer)
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -164,8 +177,7 @@ const SmForm: React.FC = () => {
       if (error.response) {
         console.error("Server Error:", error.response.data);
         alert(
-          `An error occurred: ${
-            error.response.data.message || "Please try again later."
+          `An error occurred: ${error.response.data.message || "Please try again later."
           }`
         );
       } else if (error.request) {
@@ -215,8 +227,7 @@ const SmForm: React.FC = () => {
         if (error.response) {
           console.error("Server Error:", error.response.data);
           alert(
-            `An error occurred: ${
-              error.response.data.message || "Please try again later."
+            `An error occurred: ${error.response.data.message || "Please try again later."
             }`
           );
         } else if (error.request) {
@@ -248,6 +259,7 @@ const SmForm: React.FC = () => {
         `http://localhost:8000/api/request_status/${request_no}/`,
         { sender_approval }
       );
+      await axios.put(`http://localhost:8000/api/request_status/${request_no}/`, {sending_manager: sign});
       alert("Form authorized successfully!");
       navigate("/sending-manager");
     } catch (error) {
@@ -450,6 +462,33 @@ const SmForm: React.FC = () => {
           <li>Ensure material type is accurate.</li>
           <li>Follow proper storage protocol.</li>
         </ul>
+      </div>
+
+      <div className="d-flex flex-column justify-content-center align-items-center">
+        <h3>Requesting Facility</h3>
+        <div>
+          <label className="mx-3 my-3">Engineer:</label>
+          <input className="mx-5 my-3" type="text" placeholder="Engineer Name and Date" value={sending_engineer} />
+          <label className="mx-3 my-3">Manager:</label>
+          <input className="mx-5 my-3" type="text" placeholder="Manager Name and Date" value={sign}/>
+        </div>
+
+        <h3>Storage Facility</h3>
+        <div className="signature-row">
+          <label className="mx-3 my-3">Engineer:</label>
+          <input className="mx-5 my-3" type="text" placeholder="Engineer Name and Date" />
+          <label className="mx-3 my-3">Manager:</label>
+          <input className="mx-5 my-3" type="text" placeholder="Manager Name and Date" />
+        </div>
+
+        {/* Disposing Facility section */}
+        <h3>Disposing Facility</h3>
+        <div className="signature-row">
+          <label className="mx-3 my-3">Engineer:</label>
+          <input className="mx-5 my-3" type="text" placeholder="Engineer Name and Date" />
+          <label className="mx-3 my-3">Manager:</label>
+          <input className="mx-5 my-3" type="text" placeholder="Manager Name and Date" />
+        </div>
       </div>
 
       <div className="d-flex flex-row justify-content-center align-items-center my-4">

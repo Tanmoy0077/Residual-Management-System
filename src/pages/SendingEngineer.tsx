@@ -60,6 +60,7 @@ const SendingEngineer: React.FC = () => {
       <AppNavbar />
       <div className="main-content">
         <div className="header-section">
+        <h1>Requesting Facility</h1>
           <h2 className="welcome-message">Welcome Back, {userName}!</h2>
           <button className="create-button" onClick={createRequest}>
             Create new request
@@ -79,7 +80,7 @@ const SendingEngineer: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {requestStatus.map((request, index) => (
+                {requestStatus.filter((element)=>element.sender_approval === "No").map((request, index) => (
                   <tr key={index}>
                     <td>{request.request_no}</td>
                     <td>

@@ -42,6 +42,12 @@ interface FormDetailsData {
 
 const ResidualPropellantForm: React.FC = () => {
   const name: string = localStorage.getItem("name") || "User";
+  const date = new Date();
+  const day = date.getDay();
+  const month = date.getMonth();
+  const year = date.getFullYear();
+  const full_date = ` ${day}-${month}-${year}`;
+  const sign = name + full_date;
   // State for form fields
   const [facility, setFacility] = useState<string>("");
   const [buildingNo, setBuildingNo] = useState<number>();
@@ -171,7 +177,7 @@ const ResidualPropellantForm: React.FC = () => {
         return; // Exit loop if any error occurs
       }
     }
-
+    // await axios.put(`http://localhost:8000/api/request_status/${requestNo}/`, {sending_engineer: sign})
     alert("Form submitted successfully!");
     navigate(`/sending-engineer`);
   };
@@ -368,7 +374,7 @@ const ResidualPropellantForm: React.FC = () => {
         <h3>Requesting Facility</h3>
         <div>
           <label className="mx-3 my-3">Engineer:</label>
-          <input className="mx-5 my-3" type="text" placeholder={name} value={name}/>
+          <input className="mx-5 my-3" type="text" placeholder={name} value={sign}/>
           <label className="mx-3 my-3">Manager:</label>
           <input className="mx-5 my-3" type="text" placeholder="Manager Name and Date" />
         </div>

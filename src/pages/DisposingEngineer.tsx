@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import "../css/DisposingEngineer.css"; // Import the CSS file for styling
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import AppNavbar from "../components/AppNavbar";
 
 interface RequestStatus {
   request_no: number;
@@ -20,9 +21,6 @@ interface RequestStatus {
   disposal_validated: "Yes" | "No";
   disposal_confirmation: "Yes" | "No";
 }
-
-// const DisposingEngineer: React.FC = () => {
-//   const userName = 'John Doe'; // Replace with dynamic user name if needed
 
 const DisposingEngineer: React.FC = () => {
   const userName: string = localStorage.getItem("name") || "User";
@@ -52,8 +50,7 @@ const DisposingEngineer: React.FC = () => {
   if (error) {
     console.log(error);
   }
-
-  // Handle the "Verify" button click for each row
+  
   const handleVerify = (request_no: number) => {
     navigate(`/de-form/${request_no}/`)
   };
@@ -63,7 +60,7 @@ const DisposingEngineer: React.FC = () => {
   return (
     <div className="disposing-engineer">
       {/* Navigation Bar */}
-      <nav className="navbar">
+      {/* <nav className="navbar">
         <div className="navbar-left">
           <h1>Disposing Facility</h1>
         </div>
@@ -71,11 +68,13 @@ const DisposingEngineer: React.FC = () => {
           <button className="nav-button">Verified Requests</button>
           <button className="nav-button">Logout</button>
         </div>
-      </nav>
+      </nav> */}
+      <AppNavbar />
 
       {/* Main Content */}
       <div className="main-content">
         <div className="welcome-message">
+          <h1>Disposing Facility</h1>
           <h2>Welcome Back, {userName}</h2>
         </div>
 
