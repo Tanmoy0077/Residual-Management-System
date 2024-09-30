@@ -154,7 +154,7 @@ const ResidualPropellantForm: React.FC = () => {
 
       try {
         const response = await axios.post(`http://localhost:8000/api/form_details/`, formData);
-
+        await axios.put(`http://localhost:8000/api/request_status/${requestNo}/`, {sending_engineer: sign})
         if (response.status === 201) {
           console.log("Server Response:", response.data);
         } else {
@@ -374,7 +374,7 @@ const ResidualPropellantForm: React.FC = () => {
         <h3>Requesting Facility</h3>
         <div>
           <label className="mx-3 my-3">Engineer:</label>
-          <input className="mx-5 my-3" type="text" placeholder={name} value={sign}/>
+          <input className="mx-5 my-3" type="text" placeholder={name} value={sign} readOnly/>
           <label className="mx-3 my-3">Manager:</label>
           <input className="mx-5 my-3" type="text" placeholder="Manager Name and Date" />
         </div>

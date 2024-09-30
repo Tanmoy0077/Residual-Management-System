@@ -34,6 +34,7 @@ const ReForm: React.FC = () => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [sending_engineer, setSendingEngineer] = useState<string>("");
   const [sending_manager, setSendingManager] = useState<string>("");
+  const [isFirstEffectComplete, setIsFirstEffectComplete] = useState(false);
   // const [bagNo, setBagNo] = useState<string>("");
   // const [existingBags, setExistingBags] = useState<string[]>([]);
 
@@ -65,17 +66,43 @@ const ReForm: React.FC = () => {
           }));
           setRows(formattedRows);
         }
-        const engineer_response = await axios.get(`http://localhost:8000/api/facility_status/${facility}/`);
-        setSendingEngineer(engineer_response.data[0].sending_engineer || "")
-        setSendingManager(engineer_response.data[0].sending_manager || "")
-        console.log(sending_engineer)
-        console.log(sending_manager)
+        setIsFirstEffectComplete(true);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
     };
     fetchData();
   }, [request_no]);
+
+  useEffect(() => {
+    if (!isFirstEffectComplete) return;
+
+    const setNames = async () => {
+      try {
+        const engineer_response = await axios.get(`http://localhost:8000/api/facility_status/${facility}/`);
+        let se = "";
+        let sm = "";
+        console.log(engineer_response);
+        for(let r of engineer_response.data){
+          if(r.request_no == request_no){
+            se = r.sending_engineer;
+            sm = r.sending_manager;
+            console.log(se);
+          }
+        }
+        setSendingEngineer(se);
+        setSendingManager(sm);
+        console.log(sending_engineer);
+        console.log(sending_manager);
+        
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+    setNames();
+  }, [isFirstEffectComplete]);
+
+
 
   // Function to calculate the total quantity
   const calculateTotal = (): number => {

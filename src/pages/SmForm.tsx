@@ -28,6 +28,7 @@ interface FormDetailsData {
 }
 
 interface RequestStatusData {
+  request_no: string;
   facility_name: string;
   no_of_items: number;
   total_qty: number;
@@ -58,6 +59,7 @@ const SmForm: React.FC = () => {
   const [remarks, setRemarks] = useState<string>("");
   const navigate = useNavigate();
   const [sending_engineer, setSendingEngineer] = useState<string>("");
+  const [isFirstEffectComplete, setIsFirstEffectComplete] = useState(false);
 
   useEffect(() => {
     if (!request_no) return;
@@ -88,10 +90,7 @@ const SmForm: React.FC = () => {
           }));
           setRows(formattedRows);
         }
-
-        const engineer_response = await axios.get(`http://localhost:8000/api/facility_status/${facility}/`);
-        setSendingEngineer(engineer_response.data[0].sending_engineer || "")
-        console.log(sending_engineer)
+        setIsFirstEffectComplete(true);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -99,6 +98,26 @@ const SmForm: React.FC = () => {
 
     fetchData();
   }, [request_no]);
+
+  useEffect(() => {
+    if (!isFirstEffectComplete) return;
+
+    const setNames = async () => {
+      try {
+        const engineer_response = await axios.get(`http://localhost:8000/api/facility_status/${facility}/`);
+        let se = "";
+        for(let r of engineer_response.data){
+          if(r.request_no == request_no){
+            se = r.sending_engineer;
+          }
+        }
+        setSendingEngineer(se);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+    setNames();
+  }, [isFirstEffectComplete]);
 
   const handleInputChange = (
     index: number,
@@ -152,6 +171,7 @@ const SmForm: React.FC = () => {
 
   const makePostRequest = async () => {
     const requestData: RequestStatusData = {
+      request_no: request_no || "",
       facility_name: facility,
       no_of_items: rows.length,
       total_qty: calculateTotal(),
@@ -468,9 +488,9 @@ const SmForm: React.FC = () => {
         <h3>Requesting Facility</h3>
         <div>
           <label className="mx-3 my-3">Engineer:</label>
-          <input className="mx-5 my-3" type="text" placeholder="Engineer Name and Date" value={sending_engineer} />
+          <input className="mx-5 my-3" type="text" placeholder="Engineer Name and Date" value={sending_engineer} readOnly />
           <label className="mx-3 my-3">Manager:</label>
-          <input className="mx-5 my-3" type="text" placeholder="Manager Name and Date" value={sign}/>
+          <input className="mx-5 my-3" type="text" placeholder="Manager Name and Date" value={sign} readOnly/>
         </div>
 
         <h3>Storage Facility</h3>
