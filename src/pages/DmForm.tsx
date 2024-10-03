@@ -111,9 +111,8 @@ const DmForm: React.FC = () => {
           `http://localhost:8000/api/remarks/${request_no}/`
         );
         
-        setManagerRemarks(response.data[0].rm_remarks);
-        console.log(manager_remarks)
-
+        setManagerRemarks(response.data.rm_remarks);
+        
       } catch (error) {
         console.error("Error fetching data:", error);
       }
