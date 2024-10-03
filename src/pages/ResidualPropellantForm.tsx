@@ -43,7 +43,7 @@ interface FormDetailsData {
 const ResidualPropellantForm: React.FC = () => {
   const name: string = localStorage.getItem("name") || "User";
   const date = new Date();
-  const day = date.getDay();
+  const day = date.getDate();
   const month = date.getMonth();
   const year = date.getFullYear();
   const full_date = ` ${day}-${month}-${year}`;

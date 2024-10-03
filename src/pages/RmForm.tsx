@@ -18,7 +18,7 @@ interface Row {
 const RmForm: React.FC = () => {
   const name: string = localStorage.getItem("name") || "User";
   const date = new Date();
-  const day = date.getDay();
+  const day = date.getDate();
   const month = date.getMonth();
   const year = date.getFullYear();
   const full_date = ` ${day}-${month}-${year}`;
@@ -37,8 +37,9 @@ const RmForm: React.FC = () => {
   const [remark, setRemark] = useState<string>("");
   const [isEditable, setIsEditable] = useState<boolean>(false);
   const [sending_engineer, setSendingEngineer] = useState<string>("");
-  const [sending_manager, setSendingManager] = useState<string>(""); // State to manage edit mode
-  const [receiving_engineer, setReceivingEngineer] = useState<string>(""); // State to manage edit mode
+  const [sending_manager, setSendingManager] = useState<string>("");
+  const [receiving_engineer, setReceivingEngineer] = useState<string>("");
+  const [isFirstEffectComplete, setIsFirstEffectComplete] = useState(false);
 
   // Fetch data from the database on component mount
   useEffect(() => {
@@ -68,10 +69,7 @@ const RmForm: React.FC = () => {
           }));
           setRows(formattedRows);
         }
-        const engineer_response = await axios.get(`http://localhost:8000/api/facility_status/${facility}/`);
-        setSendingEngineer(engineer_response.data[0].sending_engineer || "")
-        setSendingManager(engineer_response.data[0].sending_manager || "")
-        setReceivingEngineer(engineer_response.data[0].receiving_engineer || "")
+        setIsFirstEffectComplete(true);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -79,6 +77,28 @@ const RmForm: React.FC = () => {
 
     fetchData();
   }, [request_no]);
+
+  useEffect(() => {
+    if (!isFirstEffectComplete) return;
+
+    const setNames = async () => {
+      try {
+        const engineer_response = await axios.get(
+          `http://localhost:8000/api/facility_status/${facility}/`
+        );
+        for (let r of engineer_response.data) {
+          if (r.request_no == request_no) {
+            setSendingEngineer(r.sending_engineer);
+            setSendingManager(r.sending_manager);
+            setReceivingEngineer(r.receiving_engineer);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+    setNames();
+  }, [isFirstEffectComplete]);
 
   // Function to calculate the total quantity
   const calculateTotal = (): number => {
@@ -111,7 +131,6 @@ const RmForm: React.FC = () => {
     }
   };
 
-
   const handleAuthorize = async () => {
     console.log("Authorize Remark:", remark);
     handleCloseAuthorizeModal();
@@ -121,12 +140,15 @@ const RmForm: React.FC = () => {
         sm_remarks: "Nothing",
         rm_remarks: remark,
       });
+      
+      await axios.put(
+        `http://localhost:8000/api/request_status/${request_no}/`,
+        {
+          receiver_approval: "Yes",
+          receiving_manager: sign,
+        }
+      );
       alert("Authorized successfully!");
-      await axios.put(`http://localhost:8000/api/request_status/${request_no}/`, {
-        receiver_approval: "Yes",
-        receiving_manager: sign
-      });
-      // await axios.put(`http://localhost:8000/api/request_status/${request_no}/`, {receiving_manager: sign});
       navigate("/receiving-manager");
     } catch (error) {
       console.error("Error authorizing:", error);
@@ -134,9 +156,9 @@ const RmForm: React.FC = () => {
   };
 
   // Handle form edit
-  // const handleEdit = () => {
-  //   setIsEditable(!isEditable);
-  // };
+  const handleEdit = () => {
+    setIsEditable(!isEditable);
+  };
 
   return (
     <div className="form-container">
@@ -345,9 +367,9 @@ const RmForm: React.FC = () => {
           >
             Authorize
           </Button>
-          {/* <Button className="btn btn-warning mx-2" onClick={handleEdit}>
+          <Button className="btn btn-warning mx-2" onClick={handleEdit}>
             {isEditable ? "Save" : "Edit"}
-          </Button> */}
+          </Button>
         </div>
       </div>
 

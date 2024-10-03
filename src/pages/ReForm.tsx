@@ -18,7 +18,7 @@ interface Row {
 const ReForm: React.FC = () => {
   const name: string = localStorage.getItem("name") || "User";
   const date = new Date();
-  const day = date.getDay();
+  const day = date.getDate();
   const month = date.getMonth();
   const year = date.getFullYear();
   const full_date = ` ${day}-${month}-${year}`;
@@ -80,20 +80,13 @@ const ReForm: React.FC = () => {
     const setNames = async () => {
       try {
         const engineer_response = await axios.get(`http://localhost:8000/api/facility_status/${facility}/`);
-        let se = "";
-        let sm = "";
-        console.log(engineer_response);
         for(let r of engineer_response.data){
           if(r.request_no == request_no){
-            se = r.sending_engineer;
-            sm = r.sending_manager;
-            console.log(se);
+            setSendingEngineer(r.sending_engineer);
+            setSendingManager(r.sending_manager);
           }
         }
-        setSendingEngineer(se);
-        setSendingManager(sm);
-        console.log(sending_engineer);
-        console.log(sending_manager);
+        
         
       } catch (error) {
         console.error("Error fetching data:", error);

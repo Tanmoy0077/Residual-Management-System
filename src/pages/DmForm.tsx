@@ -16,7 +16,7 @@ interface Row {
 const DmForm: React.FC = () => {
   const name: string = localStorage.getItem("name") || "User";
   const date = new Date();
-  const day = date.getDay();
+  const day = date.getDate();
   const month = date.getMonth();
   const year = date.getFullYear();
   const full_date = ` ${day}-${month}-${year}`;
@@ -29,10 +29,11 @@ const DmForm: React.FC = () => {
   const [motorDetails, setMotorDetails] = useState<string>("");
   const [rows, setRows] = useState<Row[]>([]);
   const [sending_engineer, setSendingEngineer] = useState<string>("");
-  const [sending_manager, setSendingManager] = useState<string>(""); // State to manage edit mode
+  const [sending_manager, setSendingManager] = useState<string>(""); 
   const [receiving_engineer, setReceivingEngineer] = useState<string>("");
   const [receiving_manager, setReceivingManager] = useState<string>("");
   const [disposing_engineer, setDisposingEngineer] = useState<string>("");
+  const [isFirstEffectComplete, setIsFirstEffectComplete] = useState(false);
   const navigate = useNavigate();
 
   // State for form edit mode
@@ -64,12 +65,7 @@ const DmForm: React.FC = () => {
           }));
           setRows(formattedRows);
         }
-        const engineer_response = await axios.get(`http://localhost:8000/api/facility_status/${facility}/`);
-        setSendingEngineer(engineer_response.data[0].sending_engineer || "")
-        setSendingManager(engineer_response.data[0].sending_manager || "")
-        setReceivingEngineer(engineer_response.data[0].receiving_engineer || "")
-        setReceivingManager(engineer_response.data[0].receiving_manager || "")
-        setDisposingEngineer(engineer_response.data[0].disposing_engineer || "")
+        setIsFirstEffectComplete(true);
 
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -78,6 +74,30 @@ const DmForm: React.FC = () => {
 
     fetchData();
   }, [request_no]);
+
+  useEffect(() => {
+    if (!isFirstEffectComplete) return;
+
+    const setNames = async () => {
+      try {
+        const engineer_response = await axios.get(
+          `http://localhost:8000/api/facility_status/${facility}/`
+        );
+        for (let r of engineer_response.data) {
+          if (r.request_no == request_no) {
+            setSendingEngineer(r.sending_engineer);
+            setSendingManager(r.sending_manager);
+            setReceivingEngineer(r.receiving_engineer);
+            setReceivingManager(r.receiving_manager);
+            setDisposingEngineer(r.disposing_engineer)
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+    setNames();
+  }, [isFirstEffectComplete]);
 
   // Function to handle adding a new row to the table
   const addRow = () => {
@@ -134,7 +154,6 @@ const DmForm: React.FC = () => {
         );
 
         await axios.put(`http://localhost:8000/api/request_status/${request_no}/`, { disposal_confirmation: "Yes", disposing_manager: sign });
-        // await axios.put(`http://localhost:8000/api/request_status/${request_no}/`, {disposing_manager: sign});
 
         if (response.status === 200) {
           console.log("Server Response:", response.data);
@@ -356,23 +375,23 @@ const DmForm: React.FC = () => {
         <h3>Requesting Facility</h3>
         <div>
           <label className="mx-3 my-3">Engineer:</label>
-          <input className="mx-5 my-3" type="text" placeholder="Engineer Name and Date" value={sending_engineer} />
+          <input className="mx-5 my-3" type="text" placeholder="Engineer Name and Date" value={sending_engineer} readOnly/>
           <label className="mx-3 my-3">Manager:</label>
-          <input className="mx-5 my-3" type="text" placeholder="Manager Name and Date" value={sending_manager} />
+          <input className="mx-5 my-3" type="text" placeholder="Manager Name and Date" value={sending_manager} readOnly/>
         </div>
 
         <h3>Storage Facility</h3>
         <div className="signature-row">
           <label className="mx-3 my-3">Engineer:</label>
-          <input className="mx-5 my-3" type="text" placeholder="Engineer Name and Date" value={receiving_engineer} />
+          <input className="mx-5 my-3" type="text" placeholder="Engineer Name and Date" value={receiving_engineer} readOnly/>
           <label className="mx-3 my-3">Manager:</label>
-          <input className="mx-5 my-3" type="text" placeholder="Manager Name and Date" value={receiving_manager} />
+          <input className="mx-5 my-3" type="text" placeholder="Manager Name and Date" value={receiving_manager} readOnly />
         </div>
 
         <h3>Disposing Facility</h3>
         <div className="signature-row">
           <label className="mx-3 my-3">Engineer:</label>
-          <input className="mx-5 my-3" type="text" placeholder="Engineer Name and Date" value={disposing_engineer} />
+          <input className="mx-5 my-3" type="text" placeholder="Engineer Name and Date" value={disposing_engineer} readOnly />
           <label className="mx-3 my-3">Manager:</label>
           <input className="mx-5 my-3" type="text" placeholder="Manager Name and Date" value={sign} />
         </div>

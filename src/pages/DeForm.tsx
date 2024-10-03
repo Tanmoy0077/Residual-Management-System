@@ -17,7 +17,7 @@ const DeForm: React.FC = () => {
   // State for form fields
   const name: string = localStorage.getItem("name") || "User";
   const date = new Date();
-  const day = date.getDay();
+  const day = date.getDate();
   const month = date.getMonth();
   const year = date.getFullYear();
   const full_date = ` ${day}-${month}-${year}`;
@@ -30,9 +30,10 @@ const DeForm: React.FC = () => {
   const [motorDetails, setMotorDetails] = useState<string>("");
   const [rows, setRows] = useState<Row[]>([]);
   const [sending_engineer, setSendingEngineer] = useState<string>("");
-  const [sending_manager, setSendingManager] = useState<string>(""); // State to manage edit mode
+  const [sending_manager, setSendingManager] = useState<string>("");
   const [receiving_engineer, setReceivingEngineer] = useState<string>("");
   const [receiving_manager, setReceivingManager] = useState<string>("");
+  const [isFirstEffectComplete, setIsFirstEffectComplete] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -62,17 +63,36 @@ const DeForm: React.FC = () => {
           }));
           setRows(formattedRows);
         }
-        const engineer_response = await axios.get(`http://localhost:8000/api/facility_status/${facility}/`);
-        setSendingEngineer(engineer_response.data[0].sending_engineer || "")
-        setSendingManager(engineer_response.data[0].sending_manager || "")
-        setReceivingEngineer(engineer_response.data[0].receiving_engineer || "")
-        setReceivingManager(engineer_response.data[0].receiving_manager || "")
+        setIsFirstEffectComplete(true);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
     };
     fetchData();
   }, [request_no]);
+
+  useEffect(() => {
+    if (!isFirstEffectComplete) return;
+
+    const setNames = async () => {
+      try {
+        const engineer_response = await axios.get(
+          `http://localhost:8000/api/facility_status/${facility}/`
+        );
+        for (let r of engineer_response.data) {
+          if (r.request_no == request_no) {
+            setSendingEngineer(r.sending_engineer);
+            setSendingManager(r.sending_manager);
+            setReceivingEngineer(r.receiving_engineer);
+            setReceivingManager(r.receiving_manager);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+    setNames();
+  }, [isFirstEffectComplete]);
 
   // State for form edit mode
   const [isEditable, setIsEditable] = useState<boolean>(false);
@@ -322,6 +342,7 @@ const DeForm: React.FC = () => {
             type="text"
             placeholder="Engineer Name and Date"
             value={sending_engineer}
+            readOnly
           />
           <label className="mx-3 my-3">Manager:</label>
           <input
@@ -329,6 +350,7 @@ const DeForm: React.FC = () => {
             type="text"
             placeholder="Manager Name and Date"
             value={sending_manager}
+            readOnly
           />
         </div>
 
@@ -340,6 +362,7 @@ const DeForm: React.FC = () => {
             type="text"
             placeholder="Engineer Name and Date"
             value={receiving_engineer}
+            readOnly
           />
           <label className="mx-3 my-3">Manager:</label>
           <input
@@ -347,6 +370,7 @@ const DeForm: React.FC = () => {
             type="text"
             placeholder="Manager Name and Date"
             value={receiving_manager}
+            readOnly
           />
         </div>
 
