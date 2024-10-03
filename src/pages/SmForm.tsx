@@ -3,6 +3,8 @@ import axios from "axios";
 import { Modal, Button, Form } from "react-bootstrap";
 import { useParams, useNavigate } from "react-router-dom";
 import "../css/SmForm.css";
+import { jsPDF } from "jspdf";
+import html2canvas from "html2canvas";
 
 interface Row {
   slNo: number;
@@ -210,6 +212,23 @@ const SmForm: React.FC = () => {
     }
   };
 
+  const generatePdf = async () => {
+    const input = document.querySelector(".form-container") as HTMLElement;
+
+    if (!input) return;
+
+    // Use html2canvas to take a snapshot of the form-container
+    const canvas = await html2canvas(input);
+    const imgData = canvas.toDataURL("image/png");
+    const pdf = new jsPDF("p", "mm", "a4");
+    const imgProps = pdf.getImageProperties(imgData);
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+    pdf.save(`residual_propellant_form_${request_no}.pdf`);
+};
+
   const handleSave = async () => {
     await makePostRequest();
     console.log("Updated status");
@@ -281,6 +300,7 @@ const SmForm: React.FC = () => {
       );
       await axios.put(`http://localhost:8000/api/request_status/${request_no}/`, {sending_manager: sign});
       alert("Form authorized successfully!");
+      generatePdf();
       navigate("/sending-manager");
     } catch (error) {
       console.error("Error authorizing form:", error);
