@@ -177,7 +177,6 @@ const ResidualPropellantForm: React.FC = () => {
         return; // Exit loop if any error occurs
       }
     }
-    // await axios.put(`http://localhost:8000/api/request_status/${requestNo}/`, {sending_engineer: sign})
     alert("Form submitted successfully!");
     navigate(`/sending-engineer`);
   };

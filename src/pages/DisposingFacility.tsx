@@ -102,10 +102,22 @@ const DisposingFacility: React.FC = () => {
 
   const handleSaveChanges = () => {
     if (selectedRequest) {
-      const updatePromises = requestDetails.map((bag) =>
+      const updatePromises = requestDetails.map((bag) => {
         axios.put(`http://localhost:8000/api/form_details/${bag.sl_no}/`, {
           disposed: bag.disposed,
         })
+        if(bag.disposed){
+          axios.put(
+            `http://localhost:8000/api/disposal_details/${bag.sl_no}/`,
+            { stored_qty: 0, disposed_qty: bag.qty}
+          );
+        } else {
+          axios.put(
+            `http://localhost:8000/api/disposal_details/${bag.sl_no}/`,
+            { stored_qty: bag.qty, disposed_qty: 0}
+          );
+        }
+      }
       );
 
       Promise.all(updatePromises)

@@ -34,6 +34,7 @@ const DeForm: React.FC = () => {
   const [receiving_engineer, setReceivingEngineer] = useState<string>("");
   const [receiving_manager, setReceivingManager] = useState<string>("");
   const [isFirstEffectComplete, setIsFirstEffectComplete] = useState(false);
+  const [manager_remarks, setManagerRemarks] = useState<string>("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -70,6 +71,24 @@ const DeForm: React.FC = () => {
     };
     fetchData();
   }, [request_no]);
+
+  useEffect(() => {
+    if (!isFirstEffectComplete) return;
+
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:8000/api/remarks/${request_no}/`
+        );
+        
+        setManagerRemarks(response.data.rm_remarks);
+
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+    fetchData();
+  }, [isFirstEffectComplete]);
 
   useEffect(() => {
     if (!isFirstEffectComplete) return;
@@ -129,7 +148,53 @@ const DeForm: React.FC = () => {
   // Function to submit the form data via a POST request
   const submitForm = async () => {
     try {
+      for (const row of rows) {
+        const formData = {
+          sl_no: request_no + "-" + row.slNo,
+          request_no: request_no,
+          facility_name: facility,
+          unit: unit,
+          segment_ref_no: motorDetails,
+          dispatch_date: dispatchDate,
+          bag_id_no: row.bagId,
+          nature_material: row.material,
+          waste_type: row.category,
+          stored_qty: row.qty,
+          remarks: manager_remarks,
+          disposed_qty: 0
+        };
+  
+        try {
+          const response = await axios.post(
+            `http://localhost:8000/api/disposal_details/`,
+            formData,
+          );
+  
+          if (response.status === 201) {
+            console.log("Server Response:", response.data);
+          } else {
+            console.error("Error:", response.statusText);
+          }
+        } catch (error: any) {
+          if (error.response) {
+            console.error("Server Error:", error.response.data);
+            alert(
+              `An error occurred: ${error.response.data.message || "Please try again later."
+              }`
+            );
+          } else if (error.request) {
+            console.error("No response received:", error.request);
+            alert("No response received from the server. Please try again.");
+          } else {
+            console.error("Error setting up the request:", error.message);
+            alert(`Error: ${error.message}`);
+          }
+          return;
+        }
+      }
+
       const disposal_validated: string = "Yes";
+
       await axios.put(
         `http://localhost:8000/api/request_status/${request_no}/`,
         { disposal_validated }

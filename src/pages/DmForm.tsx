@@ -34,6 +34,7 @@ const DmForm: React.FC = () => {
   const [receiving_manager, setReceivingManager] = useState<string>("");
   const [disposing_engineer, setDisposingEngineer] = useState<string>("");
   const [isFirstEffectComplete, setIsFirstEffectComplete] = useState(false);
+  const [manager_remarks, setManagerRemarks] = useState<string>("");
   const navigate = useNavigate();
 
   // State for form edit mode
@@ -99,6 +100,28 @@ const DmForm: React.FC = () => {
     setNames();
   }, [isFirstEffectComplete]);
 
+
+  // Fetch Receiving Manager Remarks
+  useEffect(() => {
+    if (!request_no) return;
+
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:8000/api/remarks/${request_no}/`
+        );
+        
+        setManagerRemarks(response.data[0].rm_remarks);
+        console.log(manager_remarks)
+
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, [request_no]);
+
   // Function to handle adding a new row to the table
   const addRow = () => {
     const newRow: Row = {
@@ -143,17 +166,17 @@ const DmForm: React.FC = () => {
         nature_material: row.material,
         waste_type: row.category,
         stored_qty: 0,
-        remarks: "all good",
+        remarks: manager_remarks,
         disposed_qty: row.qty
       };
 
       try {
-        const response = await axios.post(
-          `http://localhost:8000/api/disposal_details/`,
+        const response = await axios.put(
+          `http://localhost:8000/api/disposal_details/${formData.sl_no}/`,
           formData,
         );
 
-        await axios.put(`http://localhost:8000/api/request_status/${request_no}/`, { disposal_confirmation: "Yes", disposing_manager: sign });
+        
 
         if (response.status === 200) {
           console.log("Server Response:", response.data);
@@ -177,6 +200,7 @@ const DmForm: React.FC = () => {
         return;
       }
     }
+    await axios.put(`http://localhost:8000/api/request_status/${request_no}/`, { disposal_confirmation: "Yes", disposing_manager: sign });
 
     alert("Confirmed successfully!");
     navigate("/disposing-manager");
