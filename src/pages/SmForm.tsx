@@ -6,6 +6,14 @@ import "../css/SmForm.css";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 
+const categoryBackgroundColors: Record<string, string> = {
+  A: "#90ee90",
+  B: "#ffcccb",
+  C: "#FFA500",
+  D: "#FFFFFF",
+  E: "#FFFF99",
+};
+
 interface Row {
   slNo: number;
   bagId: string;
@@ -88,7 +96,7 @@ const SmForm: React.FC = () => {
             category: item.waste_type,
             buildingNo: item.bldg_no,
             qty: Number.parseFloat(item.qty),
-            disposed: false
+            disposed: false,
           }));
           setRows(formattedRows);
         }
@@ -106,10 +114,12 @@ const SmForm: React.FC = () => {
 
     const setNames = async () => {
       try {
-        const engineer_response = await axios.get(`http://localhost:8000/api/facility_status/${facility}/`);
+        const engineer_response = await axios.get(
+          `http://localhost:8000/api/facility_status/${facility}/`
+        );
         let se = "";
-        for(let r of engineer_response.data){
-          if(r.request_no == request_no){
+        for (let r of engineer_response.data) {
+          if (r.request_no == request_no) {
             se = r.sending_engineer;
           }
         }
@@ -199,7 +209,8 @@ const SmForm: React.FC = () => {
       if (error.response) {
         console.error("Server Error:", error.response.data);
         alert(
-          `An error occurred: ${error.response.data.message || "Please try again later."
+          `An error occurred: ${
+            error.response.data.message || "Please try again later."
           }`
         );
       } else if (error.request) {
@@ -227,8 +238,61 @@ const SmForm: React.FC = () => {
 
     pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
     pdf.save(`residual_propellant_form_${request_no}.pdf`);
-};
+  };
 
+  const generateTickets = async () => {
+    const pdf = new jsPDF();
+    const imgWidth = 190; // Desired width for the image
+
+    for (const [index, row] of rows.entries()) {
+      const backgroundColor =
+        categoryBackgroundColors[row.category] || "#f0f0f0";
+      const ticketHTML = `
+      <div style="display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #fffff; margin: 0;">
+      <div style="background-color: ${backgroundColor}; border-radius: 20px; padding: 30px; width: 650px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); font-family: Arial, sans-serif;">
+        <p>
+          <strong><em>Category-${row.category}:</em></strong> PROPELLANT (CURED/WATER WETTED/SPILL TRAY(FM)/AGNI CUT PIECES/ROCASIN/NEOPRENE/TEFLON WITH PROPELLANT)
+        </p>
+        <div class="ticket-details" style="margin-top: 15px;">
+          <p>Date of inspection: ${dispatchDate}</p>
+          <p>Segment reference no.: ${row.slNo}</p>
+          <p>Nature of material: ${row.material}</p>
+          <p>Facility bag id no.: ${row.bagId}</p>
+          <p>Approx. Quantity (kg): ${row.qty}</p>
+        </div>
+        <div class="ticket-footer" style="display: flex; justify-content: space-between; margin-top: 30px; padding: 0 70px;">
+          <p>Facility</p>
+          <p>Safety</p>
+        </div>
+      </div>
+    </div>
+      `;
+
+      const ticketElement = document.createElement("div");
+      ticketElement.innerHTML = ticketHTML;
+
+      document.body.appendChild(ticketElement);
+
+      const canvas = await html2canvas(ticketElement);
+      const imgData = canvas.toDataURL("image/png");
+
+      const imgHeight = (canvas.height * imgWidth) / canvas.width; // Maintain aspect ratio
+      const yPosition = 10 + (index % 3) * (imgHeight + 10); // Reset y position every 3 tickets
+
+      // Add the image to the PDF
+      pdf.addImage(imgData, "PNG", 10, yPosition, imgWidth, imgHeight);
+
+      // If this is not the last ticket, add a new page
+      if (index < rows.length - 1) {
+        pdf.addPage();
+      }
+
+      // Clean up
+      document.body.removeChild(ticketElement);
+    }
+
+    pdf.save("tickets.pdf");
+  };
   const handleSave = async () => {
     await makePostRequest();
     console.log("Updated status");
@@ -247,7 +311,7 @@ const SmForm: React.FC = () => {
         nature_material: row.material,
         waste_type: row.category,
         qty: row.qty,
-        disposed: false
+        disposed: false,
       };
       console.log(formData);
 
@@ -266,7 +330,8 @@ const SmForm: React.FC = () => {
         if (error.response) {
           console.error("Server Error:", error.response.data);
           alert(
-            `An error occurred: ${error.response.data.message || "Please try again later."
+            `An error occurred: ${
+              error.response.data.message || "Please try again later."
             }`
           );
         } else if (error.request) {
@@ -298,9 +363,13 @@ const SmForm: React.FC = () => {
         `http://localhost:8000/api/request_status/${request_no}/`,
         { sender_approval }
       );
-      await axios.put(`http://localhost:8000/api/request_status/${request_no}/`, {sending_manager: sign});
+      await axios.put(
+        `http://localhost:8000/api/request_status/${request_no}/`,
+        { sending_manager: sign }
+      );
       alert("Form authorized successfully!");
       generatePdf();
+      generateTickets();
       navigate("/sending-manager");
     } catch (error) {
       console.error("Error authorizing form:", error);
@@ -508,26 +577,54 @@ const SmForm: React.FC = () => {
         <h3>Requesting Facility</h3>
         <div>
           <label className="mx-3 my-3">Engineer:</label>
-          <input className="mx-5 my-3" type="text" placeholder="Engineer Name and Date" value={sending_engineer} readOnly />
+          <input
+            className="mx-5 my-3"
+            type="text"
+            placeholder="Engineer Name and Date"
+            value={sending_engineer}
+            readOnly
+          />
           <label className="mx-3 my-3">Manager:</label>
-          <input className="mx-5 my-3" type="text" placeholder="Manager Name and Date" value={sign} readOnly/>
+          <input
+            className="mx-5 my-3"
+            type="text"
+            placeholder="Manager Name and Date"
+            value={sign}
+            readOnly
+          />
         </div>
 
         <h3>Storage Facility</h3>
         <div className="signature-row">
           <label className="mx-3 my-3">Engineer:</label>
-          <input className="mx-5 my-3" type="text" placeholder="Engineer Name and Date" />
+          <input
+            className="mx-5 my-3"
+            type="text"
+            placeholder="Engineer Name and Date"
+          />
           <label className="mx-3 my-3">Manager:</label>
-          <input className="mx-5 my-3" type="text" placeholder="Manager Name and Date" />
+          <input
+            className="mx-5 my-3"
+            type="text"
+            placeholder="Manager Name and Date"
+          />
         </div>
 
         {/* Disposing Facility section */}
         <h3>Disposing Facility</h3>
         <div className="signature-row">
           <label className="mx-3 my-3">Engineer:</label>
-          <input className="mx-5 my-3" type="text" placeholder="Engineer Name and Date" />
+          <input
+            className="mx-5 my-3"
+            type="text"
+            placeholder="Engineer Name and Date"
+          />
           <label className="mx-3 my-3">Manager:</label>
-          <input className="mx-5 my-3" type="text" placeholder="Manager Name and Date" />
+          <input
+            className="mx-5 my-3"
+            type="text"
+            placeholder="Manager Name and Date"
+          />
         </div>
       </div>
 

@@ -367,9 +367,9 @@ const RmForm: React.FC = () => {
           >
             Authorize
           </Button>
-          <Button className="btn btn-warning mx-2" onClick={handleEdit}>
+          {/* <Button className="btn btn-warning mx-2" onClick={handleEdit}>
             {isEditable ? "Save" : "Edit"}
-          </Button>
+          </Button> */}
         </div>
       </div>
 
