@@ -224,10 +224,13 @@ const SmForm: React.FC = () => {
   };
 
   const generatePdf = async () => {
+    const buttonDiv = document.querySelector(".btns-bottom") as HTMLElement;
+    buttonDiv.style.visibility = "hidden";
+
     const input = document.querySelector(".form-container") as HTMLElement;
 
-    if (!input) return;
-
+    if (!input || !buttonDiv) return;
+    
     // Use html2canvas to take a snapshot of the form-container
     const canvas = await html2canvas(input);
     const imgData = canvas.toDataURL("image/png");
@@ -238,6 +241,7 @@ const SmForm: React.FC = () => {
 
     pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
     pdf.save(`residual_propellant_form_${request_no}.pdf`);
+    buttonDiv.style.visibility = "visible";
   };
 
   const generateTickets = async () => {
@@ -283,7 +287,7 @@ const SmForm: React.FC = () => {
       pdf.addImage(imgData, "PNG", 10, yPosition, imgWidth, imgHeight);
 
       // If this is not the last ticket, add a new page
-      if (index < rows.length - 1) {
+      if (index == 2) {
         pdf.addPage();
       }
 
@@ -593,7 +597,7 @@ const SmForm: React.FC = () => {
             readOnly
           />
         </div>
-
+        {/* Disposing Facility section *
         <h3>Storage Facility</h3>
         <div className="signature-row">
           <label className="mx-3 my-3">Engineer:</label>
@@ -610,7 +614,7 @@ const SmForm: React.FC = () => {
           />
         </div>
 
-        {/* Disposing Facility section */}
+        
         <h3>Disposing Facility</h3>
         <div className="signature-row">
           <label className="mx-3 my-3">Engineer:</label>
@@ -626,9 +630,11 @@ const SmForm: React.FC = () => {
             placeholder="Manager Name and Date"
           />
         </div>
+        */}
       </div>
+      
 
-      <div className="d-flex flex-row justify-content-center align-items-center my-4">
+      <div className="btns-bottom d-flex flex-row justify-content-center align-items-center my-4">
         {editable ? (
           <>
             <Button

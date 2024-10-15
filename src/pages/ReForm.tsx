@@ -328,7 +328,7 @@ const ReForm: React.FC = () => {
           />
         </div>
 
-        <h3>Disposing Facility</h3>
+        {/* <h3>Disposing Facility</h3>
         <div className="signature-row">
           <label className="mx-3 my-3">Engineer:</label>
           <input
@@ -344,7 +344,7 @@ const ReForm: React.FC = () => {
             placeholder="Manager Name and Date"
             disabled
           />
-        </div>
+        </div> */}
 
         <div className="button-group mt-3">
           <Button variant="success" onClick={handleShowModal}>

@@ -378,7 +378,7 @@ const ResidualPropellantForm: React.FC = () => {
           <input className="mx-5 my-3" type="text" placeholder="Manager Name and Date" />
         </div>
 
-        <h3>Storage Facility</h3>
+        {/* <h3>Storage Facility</h3>
         <div className="signature-row">
           <label className="mx-3 my-3">Engineer:</label>
           <input className="mx-5 my-3" type="text" placeholder="Engineer Name and Date"/>
@@ -386,14 +386,14 @@ const ResidualPropellantForm: React.FC = () => {
           <input className="mx-5 my-3" type="text" placeholder="Manager Name and Date" />
         </div>
 
-        {/* Disposing Facility section */}
+        
         <h3>Disposing Facility</h3>
         <div className="signature-row">
           <label className="mx-3 my-3">Engineer:</label>
           <input className="mx-5 my-3" type="text" placeholder="Engineer Name and Date" />
           <label className="mx-3 my-3">Manager:</label>
           <input className="mx-5 my-3" type="text" placeholder="Manager Name and Date" />
-        </div>
+        </div> */}
 
         <button className="submit-button mt-3" onClick={submitForm}>
           Submit
