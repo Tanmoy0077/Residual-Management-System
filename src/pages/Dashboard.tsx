@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import '../css/Dashboard.css';
 import Navbar from '../components/AppNavbar';
 import axios from 'axios';
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
-import { Bar } from 'react-chartjs-2';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
+import { Bar, Pie } from 'react-chartjs-2';
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
 interface PropellantData {
   A: number;
@@ -90,6 +90,39 @@ const Dashboard: React.FC = () => {
         backgroundColor: 'rgba(54, 162, 235, 0.6)',
       },
     ],
+  };
+
+  const availablePieData = {
+    labels: ['SMPC1', 'SMPC2'],
+    datasets: [
+      {
+        label: 'Available Stock',
+        data: [
+          calculateRowTotal(availableData.U1),
+          calculateRowTotal(availableData.U2),
+        ],
+        backgroundColor: ['rgba(75, 192, 192, 0.6)', 'rgba(153, 102, 255, 0.6)'],
+      },
+    ],
+  };
+  const disposedPieData = {
+    labels: ['SMPC1', 'SMPC2'],
+    datasets: [
+      {
+        label: 'Disposed Stock',
+        data: [
+          calculateRowTotal(disposedData.U1),
+          calculateRowTotal(disposedData.U2),
+        ],
+        backgroundColor: ['rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)'],
+      },
+    ],
+  };
+
+  // Pie chart options to make them smaller
+  const pieChartOptions = {
+    maintainAspectRatio: false, // Maintain aspect ratio set to false
+    responsive: true,
   };
 
   return (
@@ -182,12 +215,20 @@ const Dashboard: React.FC = () => {
         <div className="chart">
           <h3 className='d-flex justify-content-center'>Available Stock per Category</h3>
           <Bar data={availableChartData} />
+          <h3 className='d-flex justify-content-center mt-5'>Available Stock Pie Chart</h3>
+          <div style={{ position: 'relative', height: '250px' }}> {/* Set a specific height */}
+            <Pie data={availablePieData} options={pieChartOptions} />
+          </div>
         </div>
 
         {/* Chart for Disposed Stock */}
         <div className="chart">
           <h3 className='d-flex justify-content-center'>Disposed Stock per Category</h3>
           <Bar data={disposedChartData} />
+          <h3 className='d-flex justify-content-center mt-5'>Disposed Stock Pie Chart</h3>
+          <div style={{ position: 'relative', height: '250px' }}> {/* Set a specific height */}
+            <Pie data={disposedPieData} options={pieChartOptions} />
+          </div>
         </div>
       </div>
       <div className="totals">
