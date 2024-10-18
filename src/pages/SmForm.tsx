@@ -230,8 +230,7 @@ const SmForm: React.FC = () => {
     const input = document.querySelector(".form-container") as HTMLElement;
 
     if (!input || !buttonDiv) return;
-    
-    // Use html2canvas to take a snapshot of the form-container
+
     const canvas = await html2canvas(input);
     const imgData = canvas.toDataURL("image/png");
     const pdf = new jsPDF("p", "mm", "a4");
@@ -246,7 +245,7 @@ const SmForm: React.FC = () => {
 
   const generateTickets = async () => {
     const pdf = new jsPDF();
-    const imgWidth = 190; // Desired width for the image
+    const imgWidth = 190;
 
     for (const [index, row] of rows.entries()) {
       const backgroundColor =
@@ -280,18 +279,15 @@ const SmForm: React.FC = () => {
       const canvas = await html2canvas(ticketElement);
       const imgData = canvas.toDataURL("image/png");
 
-      const imgHeight = (canvas.height * imgWidth) / canvas.width; // Maintain aspect ratio
-      const yPosition = 10 + (index % 3) * (imgHeight + 10); // Reset y position every 3 tickets
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      const yPosition = 10 + (index % 3) * (imgHeight + 10);
 
-      // Add the image to the PDF
       pdf.addImage(imgData, "PNG", 10, yPosition, imgWidth, imgHeight);
 
-      // If this is not the last ticket, add a new page
-      if (index == 2) {
+      if (index % 3 == 2) {
         pdf.addPage();
       }
 
-      // Clean up
       document.body.removeChild(ticketElement);
     }
 
@@ -632,7 +628,6 @@ const SmForm: React.FC = () => {
         </div>
         */}
       </div>
-      
 
       <div className="btns-bottom d-flex flex-row justify-content-center align-items-center my-4">
         {editable ? (
