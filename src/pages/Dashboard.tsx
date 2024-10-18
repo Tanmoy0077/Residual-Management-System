@@ -1,164 +1,11 @@
-// import React, { useState, useEffect } from 'react';
-// import '../css/Dashboard.css';
-// import Navbar from '../components/AppNavbar'; // Make sure this CSS file is in the same folder or adjust the path accordingly.
-
-// interface PropellantData {
-//   A: number;
-//   B: number;
-//   C: number;
-//   D: number;
-//   E: number;
-// }
-
-// interface TableData {
-//   SMPC1: PropellantData;
-//   SMPC2: PropellantData;
-// }
-
-// const Dashboard: React.FC = () => {
-//   // Placeholder for available and disposed data, replace with data from your database.
-//   const [availableData, setAvailableData] = useState<TableData>({
-//     SMPC1: { A: 5, B: 6, C: 7, D: 8, E: 9 },
-//     SMPC2: { A: 5, B: 6, C: 7, D: 8, E: 9 },
-//   });
-
-//   const [disposedData, setDisposedData] = useState<TableData>({
-//     SMPC1: { A: 0, B: 0, C: 0, D: 0, E: 0 },
-//     SMPC2: { A: 0, B: 0, C: 0, D: 0, E: 0 },
-//   });
-
-//   useEffect(() => {
-//     // Fetch data from the database (you can replace this with actual API calls)
-//     // Example API call or fetch from DB
-//     // setAvailableData(fetchedAvailableData);
-//     // setDisposedData(fetchedDisposedData);
-//   }, []);
-
-//   const calculateRowTotal = (data: PropellantData): number => {
-//     return Object.values(data).reduce((acc, curr) => acc + curr, 0);
-//   };
-
-//   const calculateColumnTotal = (data: TableData, column: keyof PropellantData): number => {
-//     return Object.keys(data).reduce((acc, key) => acc + data[key as keyof TableData][column], 0);
-//   };
-
-//   const calculateGrandTotal = (data: TableData): number => {
-//     const rowTotals = Object.keys(data).map((key) => calculateRowTotal(data[key as keyof TableData]));
-//     return rowTotals.reduce((acc, curr) => acc + curr, 0);
-//   };
-
-//   const totalAvailable = calculateGrandTotal(availableData);
-//   const totalDisposed = calculateGrandTotal(disposedData);
-
-//   return (
-//     <div className="dashboard">
-
-//       <Navbar />
-//       <div className="heading d-flex flex-column justify-content-center align-items-center my-5">
-
-//         <h1>Welcome, {localStorage.getItem("name") || "User"}</h1>
-
-//         <h2>Residual Propellant Management Dashboard</h2>
-
-//       </div>
-
-//       <div className="tables-container d-flex justify-content-between">
-//         {/* Table for Propellant Stock Available */}
-//         <div className="table mx-3 d-flex justify-content-center flex-column align-items-center">
-//           <h3>Propellant Stock Available</h3>
-//           <table>
-//             <thead>
-//               <tr>
-//                 <th>Unit</th>
-//                 <th>A</th>
-//                 <th>B</th>
-//                 <th>C</th>
-//                 <th>D</th>
-//                 <th>E</th>
-//                 <th>Total</th>
-//               </tr>
-//             </thead>
-//             <tbody>
-//               {Object.keys(availableData).map((unit) => (
-//                 <tr key={unit}>
-//                   <td>{unit}</td>
-//                   <td>{availableData[unit as keyof TableData].A}</td>
-//                   <td>{availableData[unit as keyof TableData].B}</td>
-//                   <td>{availableData[unit as keyof TableData].C}</td>
-//                   <td>{availableData[unit as keyof TableData].D}</td>
-//                   <td>{availableData[unit as keyof TableData].E}</td>
-//                   <td>{calculateRowTotal(availableData[unit as keyof TableData])}</td>
-//                 </tr>
-//               ))}
-//               <tr>
-//                 <td>Total</td>
-//                 <td>{calculateColumnTotal(availableData, 'A')}</td>
-//                 <td>{calculateColumnTotal(availableData, 'B')}</td>
-//                 <td>{calculateColumnTotal(availableData, 'C')}</td>
-//                 <td>{calculateColumnTotal(availableData, 'D')}</td>
-//                 <td>{calculateColumnTotal(availableData, 'E')}</td>
-//                 <td>{totalAvailable}</td>
-//               </tr>
-//             </tbody>
-//           </table>
-//         </div>
-
-//         {/* Table for Propellant Stock Disposed */}
-//         <div className="table mx-3 d-flex justify-content-center flex-column align-items-center">
-//           <h3>Propellant Stock Disposed</h3>
-//           <table>
-//             <thead>
-//               <tr>
-//                 <th>Unit</th>
-//                 <th>A</th>
-//                 <th>B</th>
-//                 <th>C</th>
-//                 <th>D</th>
-//                 <th>E</th>
-//                 <th>Total</th>
-//               </tr>
-//             </thead>
-//             <tbody>
-//               {Object.keys(disposedData).map((unit) => (
-//                 <tr key={unit}>
-//                   <td>{unit}</td>
-//                   <td>{disposedData[unit as keyof TableData].A}</td>
-//                   <td>{disposedData[unit as keyof TableData].B}</td>
-//                   <td>{disposedData[unit as keyof TableData].C}</td>
-//                   <td>{disposedData[unit as keyof TableData].D}</td>
-//                   <td>{disposedData[unit as keyof TableData].E}</td>
-//                   <td>{calculateRowTotal(disposedData[unit as keyof TableData])}</td>
-//                 </tr>
-//               ))}
-//               <tr>
-//                 <td>Total</td>
-//                 <td>{calculateColumnTotal(disposedData, 'A')}</td>
-//                 <td>{calculateColumnTotal(disposedData, 'B')}</td>
-//                 <td>{calculateColumnTotal(disposedData, 'C')}</td>
-//                 <td>{calculateColumnTotal(disposedData, 'D')}</td>
-//                 <td>{calculateColumnTotal(disposedData, 'E')}</td>
-//                 <td>{totalDisposed}</td>
-//               </tr>
-//             </tbody>
-//           </table>
-//         </div>
-//       </div>
-
-//       {/* Totals Display */}
-//       <div className="totals">
-//         <p>Total Propellant Stock Available is {totalAvailable}</p>
-//         <p>Total Propellant Stock Disposed is {totalDisposed}</p>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default Dashboard;
-
 import React, { useState, useEffect } from 'react';
 import '../css/Dashboard.css';
 import Navbar from '../components/AppNavbar';
 import axios from 'axios';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+import { Bar } from 'react-chartjs-2';
+
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 interface PropellantData {
   A: number;
@@ -210,6 +57,40 @@ const Dashboard: React.FC = () => {
 
   const totalAvailable = calculateGrandTotal(availableData);
   const totalDisposed = calculateGrandTotal(disposedData);
+
+  // Chart data for Available Stock
+  const availableChartData = {
+    labels: ['A', 'B', 'C', 'D', 'E'],
+    datasets: [
+      {
+        label: 'Unit 1',
+        data: Object.values(availableData.U1),
+        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+      },
+      {
+        label: 'Unit 2',
+        data: Object.values(availableData.U2),
+        backgroundColor: 'rgba(153, 102, 255, 0.6)',
+      },
+    ],
+  };
+
+  // Chart data for Disposed Stock
+  const disposedChartData = {
+    labels: ['A', 'B', 'C', 'D', 'E'],
+    datasets: [
+      {
+        label: 'Unit 1',
+        data: Object.values(disposedData.U1),
+        backgroundColor: 'rgba(255, 99, 132, 0.6)',
+      },
+      {
+        label: 'Unit 2',
+        data: Object.values(disposedData.U2),
+        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+      },
+    ],
+  };
 
   return (
     <div className="dashboard">
@@ -294,6 +175,19 @@ const Dashboard: React.FC = () => {
               </tr>
             </tbody>
           </table>
+        </div>
+      </div>
+      <div className="charts-container">
+        {/* Chart for Available Stock */}
+        <div className="chart">
+          <h3 className='d-flex justify-content-center'>Available Stock per Category</h3>
+          <Bar data={availableChartData} />
+        </div>
+
+        {/* Chart for Disposed Stock */}
+        <div className="chart">
+          <h3 className='d-flex justify-content-center'>Disposed Stock per Category</h3>
+          <Bar data={disposedChartData} />
         </div>
       </div>
       <div className="totals">

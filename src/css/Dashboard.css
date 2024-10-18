@@ -1,10 +1,10 @@
+/* 
 
-
-/* .navbar {
+.navbar {
     display: flex;
     justify-content: flex-end;
     margin-bottom: 20px;
-} */
+}
 
 
 h1 {
@@ -50,4 +50,138 @@ tfoot td {
   text-align: center;
   margin-top: 20px;
   font-size: 18px;
+} */
+
+/* Container for tables and charts */
+.tables-container {
+  display: flex;
+  justify-content: space-around; /* Keep the tables side-by-side */
+  margin-bottom: 40px; /* Add space between the tables and charts */
 }
+
+.table {
+  width: 45%;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: center;
+}
+
+th, td {
+  padding: 10px;
+  border: 1px solid #ddd;
+}
+
+thead th {
+  background-color: #f2f2f2;
+}
+
+tfoot td {
+  font-weight: bold;
+}
+
+/* Container for charts */
+.charts-container {
+  display: flex;
+  justify-content: space-around; /* Align charts side by side as per respective tables */
+  margin-bottom: 30px;
+}
+
+.chart {
+  width: 45%; /* Set chart width to match table width */
+  margin-top: 20px; /* Add space between the tables and charts */
+}
+
+.totals {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 18px;
+} */
+
+.dashboard {
+  padding: 20px;
+}
+
+.navbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+}
+
+.logout button {
+  background-color: #ff4d4d;
+  border: none;
+  padding: 10px 20px;
+  color: white;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+h1, h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* Container for tables */
+.tables-container {
+  display: flex;
+  justify-content: space-between; /* Keep the tables side-by-side */
+  margin-bottom: 40px; /* Add space between the tables and charts */
+}
+
+.table {
+  width: 45%; /* Ensure both tables take up equal space */
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: center;
+}
+
+th, td {
+  padding: 10px;
+  border: 1px solid #ddd;
+}
+
+thead th {
+  background-color: #f2f2f2;
+}
+
+tfoot td {
+  font-weight: bold;
+}
+
+/* Container for charts */
+.charts-container {
+  display: flex;
+  justify-content: space-between; /* Align charts side by side as per respective tables */
+  margin-top: 20px; /* Space above the charts */
+}
+
+.chart {
+  width: 45%; /* Set chart width to match table width */
+  margin-top: 20px; /* Add space between the tables and charts */
+}
+
+.totals {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 18px;
+}
+
+/* Optional: Add responsiveness for smaller screens */
+@media (max-width: 768px) {
+  .tables-container, .charts-container {
+    flex-direction: column; /* Stack items on smaller screens */
+    align-items: center; /* Center align */
+  }
+  
+  .table, .chart {
+    width: 100%; /* Full width for tables and charts on small screens */
+  }
+}
+
+
