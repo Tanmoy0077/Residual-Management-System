@@ -14,6 +14,14 @@ const categoryBackgroundColors: Record<string, string> = {
   E: "#FFFF99",
 };
 
+const categoryTextTicket: Record<string, string> = {
+  A: "PROPELLANT (CURED/WATER WETTED/SPILL TRAY(FM)/AGNI CUT PIECES/ROCASIN/NEOPRENE/TEFLON WITH PROPELLANT)",
+  B: "SHROUD DUST / CONTAMINATED Al POWDER / UNCURED PROPELLANT",
+  C: "EXPLOSIVE POWDERS (CONTAMINATED AP POWDER/ AP RESIDUE FROM EVAPORATION POND)",
+  D: "PROPELLANT CONTAMINATED WASTE (POLYTHENE/VELOSTAT/CLOTH/GLOVES)",
+  E: "POWDER CONTAMINATED WASTE (POLYTHENE/VELOSTAT/CLOTH/GLOVES)",
+};
+
 interface Row {
   slNo: number;
   bagId: string;
@@ -250,11 +258,12 @@ const SmForm: React.FC = () => {
     for (const [index, row] of rows.entries()) {
       const backgroundColor =
         categoryBackgroundColors[row.category] || "#f0f0f0";
+      const categoryText = categoryTextTicket[row.category] || "";
       const ticketHTML = `
       <div style="display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #fffff; margin: 0;">
       <div style="background-color: ${backgroundColor}; border-radius: 20px; padding: 30px; width: 650px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); font-family: Arial, sans-serif;">
         <p>
-          <strong><em>Category-${row.category}:</em></strong> PROPELLANT (CURED/WATER WETTED/SPILL TRAY(FM)/AGNI CUT PIECES/ROCASIN/NEOPRENE/TEFLON WITH PROPELLANT)
+          <strong><em>Category-${row.category}:</em></strong> ${categoryText}
         </p>
         <div class="ticket-details" style="margin-top: 15px;">
           <p>Date of inspection: ${dispatchDate}</p>
